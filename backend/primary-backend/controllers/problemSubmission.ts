@@ -1,6 +1,9 @@
 import {Request, Response} from 'express';
 import { redisClient } from '../config/redisClient';
 import {z} from 'zod';
+import prisma from '../config/prismaClient';
+
+//exec run code with two test cases and return the result
 
 export const submitProblem = async(req:Request, res: Response)=>{
     try{
@@ -20,11 +23,18 @@ export const submitProblem = async(req:Request, res: Response)=>{
         const {questionId , code , language} = req.body;
         const {userId} = req.body;
 
+        const question = await prisma.question.findFirst({
+            where:{
+                id: questionId
+            }
+        });
+
         const problemSubmission = {
             questionId,
             code,
             language,
-            userId
+            userId,
+            testCases: question?.testCases,
         }
 
         await redisClient.lPush("submissions", JSON.stringify(problemSubmission));

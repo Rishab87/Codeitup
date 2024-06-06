@@ -31,6 +31,7 @@ model Question{
   id       String   @id @default(cuid())
   title    String
   description String
+  config String //config main jo question hoga uss hisab se input bne honge aur woh input pass h honge function main call ho rha hoga aur woh UI pe nhi dikhaonga code main add krke bhej dunga 
   difficulty String
   minTime Int
   minSpace Int
@@ -50,7 +51,7 @@ model Tag {
 
 model Submissions{
   id       String   @id @default(cuid())
-  title    String
+  // title    String //remove this //migrate
   createdAt DateTime @default(now())
   questionId String
   executedTime Int

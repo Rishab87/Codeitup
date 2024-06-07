@@ -101,7 +101,8 @@ export const signup = async(req:Request, res: Response)=>{
                 password: hashedPassword,
                 firstName,
                 lastName,
-                username
+                username,
+                image: `https://api.dicebear.com/8.x/thumbs/svg?seed=${username}`,
             }
         });
 

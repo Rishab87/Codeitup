@@ -3,9 +3,10 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import {connectRedis, redisClient} from '../config/redisClient';
 import WebSocket from 'ws';
-import { submitProblem } from '../controllers/problemSubmission';
 import prisma from '../config/prismaClient';
-import { SubmissionStatus } from '@prisma/client';
+import authRoutes from '../routes/auth';
+import problemSubmissionRoutes from '../routes/problemSubmission';
+import questionRoutes from '../routes/questions';
 
 const app = express();
 dotenv.config();
@@ -14,6 +15,10 @@ const wss = new WebSocket.Server({ port: 8080 });
 app.use(express.json());
 app.use(cookieParser());
 connectRedis();
+
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/problem-submission', problemSubmissionRoutes);
+app.use('/api/v1/questions', questionRoutes);
 
 const PORT = process.env.PORT || 5000;
 
@@ -42,7 +47,7 @@ redisClient.subscribe('submissions' , async(err, message)=>{
     if(err){
         console.error(err);
     } else{
-        const {status , userId , questionId ,result} = JSON.parse(message);
+        const {status , userId , questionId ,result , time , memory} = JSON.parse(message);
         //test cases will contain many objects with input and output key
         ////{input: , output:}
 
@@ -52,9 +57,8 @@ redisClient.subscribe('submissions' , async(err, message)=>{
         await prisma.submissions.create({
             data:{
                 status: status,
-                executedSpace: 0,
-                executedTime: 0,
-                title: "",
+                executedSpace: time,
+                executedTime: memory,
                 Question: {
                     connect: {
                         id: questionId

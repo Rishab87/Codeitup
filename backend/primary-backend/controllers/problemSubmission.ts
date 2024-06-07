@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import { redisClient } from '../config/redisClient';
+import { redisClient , isRedisConnected } from '../config/redisClient';
 import {z} from 'zod';
 import prisma from '../config/prismaClient';
 
@@ -8,6 +8,9 @@ import prisma from '../config/prismaClient';
 export const submitProblem = async(req:Request, res: Response)=>{
     try{
 
+        if(!isRedisConnected()){
+            return res.status(500).json({error: "Redis not connected" , message: "Something went wrong  , Please try again later"});
+        }
         const submitProblemSchema = z.object({
             questionId: z.string(),
             code: z.string(),
@@ -35,6 +38,7 @@ export const submitProblem = async(req:Request, res: Response)=>{
             language,
             userId,
             testCases: question?.testCases,
+            config: question?.config,
         }
 
         await redisClient.lPush("submissions", JSON.stringify(problemSubmission));

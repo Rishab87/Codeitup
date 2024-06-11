@@ -1,4 +1,4 @@
-import { redisClient } from "../config/redis";
+import { redisClient, redisQueueClient } from "../config/redis";
 import Docker from 'dockerode';
 
 interface Result {
@@ -12,7 +12,7 @@ export async function worker(){
 
         //add check to kill the exec if time limit exceeds get minTime variable of question here
         while(1){
-            const submission = await redisClient.brPop("submissions" , 0);
+            const submission = await redisQueueClient.brPop("submissions" , 0);
             console.log(submission);
 
             const userSubmission = JSON.parse(submission!.element);
@@ -26,20 +26,30 @@ export async function worker(){
             let time = 0;
             let memory = 0;
             
-            
+            console.log("running test cases");
+            try{
             for (let testCase of userSubmission.testCases) {
                 const { input, output: expectedOutput } = testCase;
 
                 result = await runCode(userSubmission.code, userSubmission.language, input);
                 time += result.time!;
                 memory += result.memory;
+                if(result.time === null){
+                    
+                    status = "RUNTIME ERROR";
+                    break;
+                }
 
                 if (result.output.trim() !== expectedOutput.trim()) {
                     status = "WRONG ANSWER";
                     break;
                 }
             }
-
+            } catch(error){
+                status = "RUNTIME ERROR";
+                result = { time: null, memory: 0, output: (error as Error).message };
+                break;
+            }
             const resultObj = {
                 status,
                 userId: userSubmission.userId,
@@ -48,7 +58,9 @@ export async function worker(){
                 time,
                 memory,
             }
-
+            console.log(resultObj);
+            
+            console.log("SENDING RESULT");
             //send the result to the user
             await redisClient.publish("submissions" , JSON.stringify(resultObj));
         }
@@ -67,51 +79,81 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
     }
 
     const { image, fileName, compileCmd, runCmd } = config;
-
+    
     const docker = new Docker();
-
+    
     const container = await docker.createContainer({
         Image: image,
         Tty: false,
         AttachStdout: true,
+        AttachStdin: true,
+        WorkingDir: '/usr/src/app',
+        Cmd: ['/bin/sh', '-c', language === "cpp" 
+            ? `echo "${input}" | ${compileCmd} && echo "${input}" | ${runCmd}` 
+            : `echo "${input}" | ${runCmd}`],
         AttachStderr: true,
         HostConfig: {
             Binds: [`${process.cwd()}/temp:/usr/src/app`],
             Memory: 256 * 1024 * 1024, // 256 MB
             CpuShares: 256, // Relative CPU weight
-            AutoRemove: true // Automatically remove the container when it exits
+            // AutoRemove: true // Automatically remove the container when it exits
         }
     });
+    console.log(container.id);
+    console.log("EXECUTING CODE");
+  
+    await container.start();
+    console.log("Container started:", container.id);
+    
+  
+ 
+    console.log("STARTING EXEC");
 
-    const runExec = await container.exec({
-        AttachStdout: true,
-        AttachStderr: true,
-        Cmd: language === "cpp"?['/bin/sh', '-c', `time -v ${compileCmd} && time -v ${runCmd}`]:['/bin/sh', '-c', `time -v ${runCmd}`] ,
-        WorkingDir: '/usr/src/app'
-    });
-    const stream = await runExec.start({});
+    const stream = await container.attach({
+        stderr: true,
+        stdout: true,
+        stream: true,
+      });   
 
-    return new Promise((resolve, reject) => {
+    console.log("STREAM STARTED");
+
+
+    return await  new Promise((resolve, reject) => {
         let output = '';
         let errorOutput = '';
         stream.on('data', (chunk:any) => {
+    
             output += chunk.toString();
         });
         stream.on('end', async() => {
 
             const stats = await docker.getContainer(container.id).stats({ stream: false });
-            const memoryUsage = stats.memory_stats.usage / (1024 * 1024); // Convert to MB
-            const timeOutput = parseTimeOutput(errorOutput);
-            resolve({ output, time: timeOutput, memory: memoryUsage });
+            const memoryUsage = stats.memory_stats ? stats.memory_stats.usage / (1024 * 1024) : 0;
+            let timeOutput = parseTimeOutput(errorOutput);
+            console.log(memoryUsage  , timeOutput , output);
+            if(timeOutput === null){
+                timeOutput = 0;
+            }    
+            const response = output && output.slice(8).toString()
+            resolve({ output: response, time: timeOutput, memory: memoryUsage });
+            console.log("CODE EXECUTED");
+            await container.remove();
             // resolve(output);
         });
-        stream.on('stderr', (chunk: any) => {
+        stream.on('stderr', async(chunk: any) => {
             errorOutput += chunk.toString();
+            console.log(errorOutput);
+            
+            resolve({ time: null, memory: 0, output: errorOutput });
+            console.log("CODE  STD ERR EXECUTED");
         });
-        stream.on('error', (err:Error) => {
+        stream.on('error', async(err:Error) => {
+            console.log("CODE EXECUTED ERROR");
             reject(err);
         });
-    });
+    })
+    //remove container if it failed otherwise use the same container if possible and if its a good practice
+
 }
 
 

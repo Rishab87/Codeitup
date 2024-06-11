@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import { redisClient , isRedisConnected } from '../config/redisClient';
+import { redisClient , isRedisConnected, redisQueueClient } from '../config/redisClient';
 import {z} from 'zod';
 import prisma from '../config/prismaClient';
 
@@ -41,7 +41,7 @@ export const submitProblem = async(req:Request, res: Response)=>{
             config: question?.config,
         }
 
-        await redisClient.lPush("submissions", JSON.stringify(problemSubmission));
+        await redisQueueClient.lPush("submissions", JSON.stringify(problemSubmission));
 
         res.json({
             message: "Problem submitted successfully"

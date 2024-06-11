@@ -8,6 +8,10 @@ export const redisClient = createClient({
     url: process.env.REDIS_HOST
 });
 
+export const redisQueueClient = createClient({
+    url: process.env.REDIS_QUEUE
+});
+
 export const connectRedis  = async()=>{
     try{
         await redisClient.connect();
@@ -19,5 +23,18 @@ export const connectRedis  = async()=>{
         redisConnected = false;
     }
 }
+
+export const connectRedisQueue  = async()=>{
+    try{
+        await redisQueueClient.connect();
+        console.log("Redis Queue connected");
+        redisConnected = true;
+
+    } catch(error){
+        console.log(error);
+        redisConnected = false;
+    }
+}
+
 
 export const isRedisConnected = ()=> redisConnected;

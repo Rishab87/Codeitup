@@ -4,21 +4,24 @@ import {z} from 'zod';
 
 export const getQuestionsByPage = async(req:Request, res: Response)=>{
     try{
-        //use pagination fetch 50 at a time
-        const {page} = req.query as {page: string};
+
+        const {page} = req.body;
 
         if(!page) return res.status(400).json({message: "Page number is required"});
 
         const pageSize = 50;
         const skip = (parseInt(page) - 1) * pageSize;
 
-        const questions = prisma.question.findMany({
+        const questions = await prisma.question.findMany({
             skip,
             take: pageSize,
             orderBy:{
                 createdAt: 'desc'
             }
         });
+
+        console.log(questions);
+        
 
         if(!questions) return res.status(404).json({message: "No questions found"});
 
@@ -36,7 +39,7 @@ export const getQuestionsByTag = async(req:Request, res: Response)=>{
 
         if(!tag) return res.status(400).json({message: "Tag is required"});
 
-        const questions = prisma.question.findMany({
+        const questions = await prisma.question.findMany({
             where:{
                 tags:{
                     some:{
@@ -63,7 +66,7 @@ export const getQuestionsBySearch = async(req:Request, res: Response)=>{
 
         if(!search) return res.status(400).json({message: "Search query is required"});
 
-        const questions = prisma.question.findMany({
+        const questions = await prisma.question.findMany({
             where:{
                 title:{
                     contains: search
@@ -88,7 +91,7 @@ export const getQuestionById = async(req:Request, res: Response)=>{
 
         if(!id) return res.status(400).json({message: "Question id is required"});
 
-        const question = prisma.question.findFirst({
+        const question = await prisma.question.findFirst({
             where:{
                 id
             }

@@ -29,13 +29,13 @@ const Page = ({params}:{params:{page:string}}) => {
 
 
   return (
-    <div className='bg-black h-[100vh]'>
-          <Navbar/>
+    <div className='h-[100vh]'>
+          <Navbar active={2}/>
           <div>
-          <h1 className='font-bold text-white p-2'>Problems:</h1>
+          <h1 className='font-bold p-2'>Problems:</h1>
           { questions &&
             (questions.map((question:any , index)=>(
-              <div key={index} className='text-white p-2' onClick={()=> router.push(`/problems/${page}/${question?.id}`)}>
+              <div key={index} className='p-2' onClick={()=> router.push(`/problems/${page}/${question?.id}`)}>
                 <h1>{question.title}</h1>
                 <p>{question.description}</p>
                 <p>{question.difficulty}</p>

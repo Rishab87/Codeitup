@@ -7,6 +7,8 @@ interface Result {
     output: string;
 }
 
+const docker = new Docker();
+
 export async function worker(){
     try{
 
@@ -71,6 +73,38 @@ export async function worker(){
     }
 }
 
+const createContainer = async(image:string , compileCmd:string , runCmd:string , input:string):Promise<any>=>{
+    try{
+
+        const container = await docker.createContainer({
+            Image: image,
+            Tty: false,
+            AttachStdout: true,
+            AttachStdin: true,
+            WorkingDir: '/usr/src/app',
+            Cmd: ['/bin/sh', '-c', `echo "${input}" | ${compileCmd} && echo "${input}" | ${runCmd}`] ,
+            AttachStderr: true,
+            HostConfig: {
+                Binds: [`${process.cwd()}/temp:/usr/src/app`],
+                Memory: 256 * 1024 * 1024, // 256 MB
+                CpuShares: 256, // Relative CPU weight
+                // AutoRemove: true // Automatically remove the container when it exits
+            }
+        });
+
+        return container;
+
+    } catch(error){
+        console.log(error);
+        
+    }
+}
+
+//cpp container
+//jscona
+//python
+
+
 const runCode = async(code: string , language:string , input:string):Promise<Result>=>{
 
     const config = getConfig(language, code , input);
@@ -79,18 +113,14 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
     }
 
     const { image, fileName, compileCmd, runCmd } = config;
-    
-    const docker = new Docker();
-    
+        
     const container = await docker.createContainer({
         Image: image,
         Tty: false,
         AttachStdout: true,
         AttachStdin: true,
         WorkingDir: '/usr/src/app',
-        Cmd: ['/bin/sh', '-c', language === "cpp" 
-            ? `echo "${input}" | ${compileCmd} && echo "${input}" | ${runCmd}` 
-            : `echo "${input}" | ${runCmd}`],
+        Cmd: ['/bin/sh', '-c', `echo "${input}" | ${compileCmd} && echo "${input}" | ${runCmd}`] ,
         AttachStderr: true,
         HostConfig: {
             Binds: [`${process.cwd()}/temp:/usr/src/app`],
@@ -125,16 +155,40 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
     
             output += chunk.toString();
         });
+
         stream.on('end', async() => {
 
+            // const exitCode = await container.inspect().then(data => data.State.ExitCode);
+
+            // Check if the container exited with a non-zero exit code
+            const response = output && output.slice(8).toString()
+
+//             if (exitCode !== 0) {
+//                 // Container exited with an error
+//                 console.log('Container exited with error:', exitCode);
+                
+//                 // Check the output content for error messages
+//                 if (output.includes('error')) {
+//                     // Compile-time error detected
+//                     console.log('Compile-time error:', output);
+//                     resolve({ output: response, time: null, memory: 0 });
+                
+//                 } else if(errorOutput.includes('error')) {
+//                     // Runtime error detected
+//                     console.log('Runtime error:', output);
+//                     resolve({ output: response, time: null, memory: 0 });
+// //add runtime error in status and make an errorOutput inside result if it exists add that to status in backend
+//                 }
+//             }
+        
+
             const stats = await docker.getContainer(container.id).stats({ stream: false });
-            const memoryUsage = stats.memory_stats ? stats.memory_stats.usage / (1024 * 1024) : 0;
+            const memoryUsage = stats.memory_stats ? ((stats.memory_stats.usage) / (1024 * 1024)) : 0;
             let timeOutput = parseTimeOutput(errorOutput);
             console.log(memoryUsage  , timeOutput , output);
             if(timeOutput === null){
                 timeOutput = 0;
             }    
-            const response = output && output.slice(8).toString()
             resolve({ output: response, time: timeOutput, memory: memoryUsage });
             console.log("CODE EXECUTED");
             await container.remove();
@@ -146,10 +200,12 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
             
             resolve({ time: null, memory: 0, output: errorOutput });
             console.log("CODE  STD ERR EXECUTED");
+            await container.remove();
         });
         stream.on('error', async(err:Error) => {
             console.log("CODE EXECUTED ERROR");
             reject(err);
+            await container.remove();
         });
     })
     //remove container if it failed otherwise use the same container if possible and if its a good practice
@@ -164,6 +220,7 @@ const parseTimeOutput = (output:string) => {
     return realTime ? Math.round(realTime) : null;
 };
 
+//in DB divide config three parts for every language headers , function execution  , show just function part add headers function and excecution and send 
 
 const getConfig = (language:string, code:string , input:string) => {
     switch (language) {
@@ -171,15 +228,16 @@ const getConfig = (language:string, code:string , input:string) => {
             return {
                 image: 'python:3.9',
                 fileName: 'script.py',
-                compileCmd: `echo "${code.replace(/"/g, '\\"')}" > script.py`,
-                runCmd: `echo "${input.replace(/"/g, '\\"')}" | python script.py`
+                compileCmd: `echo "${code.replace(/"/g, '\\"')}" > /usr/src/app/script.py`,
+                runCmd: `echo "${input.replace(/"/g, '\\"')}" | python /usr/src/app/script.py`
+
             };
         case 'javascript':
             return {
                 image: 'node:14',
                 fileName: 'script.js',
-                compileCmd: `echo "${code.replace(/"/g, '\\"')}" > script.js`,
-                runCmd: `echo "${input.replace(/"/g, '\\"')}" | node script.js`
+                compileCmd: `echo "${code.replace(/"/g, '\\"')}" > /usr/src/app/script.js`,
+                runCmd: `echo "${input.replace(/"/g, '\\"')}" | node /usr/src/app/script.js`
             };
         case 'cpp':
             return {

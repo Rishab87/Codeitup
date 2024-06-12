@@ -81,6 +81,8 @@ redisClient.subscribe('submissions' , async(message)=>{
     }
 );
 
+//add editorial and comments feature
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

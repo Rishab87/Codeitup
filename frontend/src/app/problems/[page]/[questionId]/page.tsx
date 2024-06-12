@@ -39,11 +39,11 @@ const Page = ({params}:{params:{questionId:string}}) => {
     //ws connection to get results
 
     const submitCode = async()=>{
-        console.log(code);
+        console.log(code + question.config.javascript.executionCode);
         //submit code
 
 
-        await submitProblem(code , "cpp" , questionId);
+        await submitProblem(code + '\n' + question.config.javascript.executionCode , "javascript" , questionId);
 
     }
     
@@ -55,7 +55,7 @@ const Page = ({params}:{params:{questionId:string}}) => {
             <p>{question.description}</p>
             <p>{question.difficulty}</p>
             <p>{question.constraints}</p>
-            <textarea name="" id="" onChange={(e:any)=> setCode(e.target.value)}>{question.config.cpp}</textarea>
+            <textarea name="" id="" onChange={(e:any)=> setCode(e.target.value)}>{question.config.javascript.userCode}</textarea>
             <button onClick={submitCode}>Submit</button>
             </div>
             

@@ -147,6 +147,16 @@ export const login = async(req:Request, res: Response)=>{
         const token = jwt.sign({id: user.id}, process.env.JWT_SECRET as string);
         res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
         user.password = "undefined";
+
+        await prisma.user.update({
+            where:{
+                id: user.id,
+            },
+            data:{
+                token: token,
+            }
+        });
+        //verify token ki ussi user ka new token hai when user tries to login thu tokenAPI path
         return res.status(200).json({message: "User logged in successfully", data: user , token,});
 
     } catch(error){

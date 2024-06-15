@@ -94,6 +94,9 @@ export const getQuestionById = async(req:Request, res: Response)=>{
         const question = await prisma.question.findFirst({
             where:{
                 id
+            },
+            include:{
+                tags: true
             }
         });
 

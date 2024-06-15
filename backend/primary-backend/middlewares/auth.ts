@@ -10,7 +10,7 @@ export const auth = async(req:Request, res: Response, next: NextFunction)=>{
         const token = req.cookies.token;
 
         if(!token){
-            return res.status(401).json({message: "Unauthorized"})
+            return res.status(401).json({message: "Unauthorized" , success:false});
         }
         try{
 
@@ -18,7 +18,7 @@ export const auth = async(req:Request, res: Response, next: NextFunction)=>{
             req.body.userId = (decoded as any).id;
 
         } catch(error){
-            return res.status(401).json({message: "Unauthorized"})
+            return res.status(401).json({message: "Unauthorized" , success: false})
         }
         next();
         

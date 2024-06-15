@@ -2,46 +2,40 @@
 
 import { getQuestionsByPage } from '@/apis/apiFunctions/questions';
 import Navbar from '@/components/Navbar';
-import { useRouter } from 'next/navigation';
 import React, { useEffect  , useState} from 'react'
+import SearchBar from './SearchBar';
+import { useAppDispatch, useAppSelector } from '@/redux-toolkit/Typed-hooks';
+import { QuestionsTable } from './QuestionsTable';
+import { setQuestions } from '@/redux-toolkit/slices/questions';
 
 const Page = ({params}:{params:{page:string}}) => {
 
     const {page} = params;
 
-    const [questions , setQuestions] = useState([]);
+
+    const dispatch = useAppDispatch();
 
     useEffect(()=>{
 
       const fetchQuestions = async()=>{
         const questions  = await getQuestionsByPage(page);
         //fetch questions acc to page
-        setQuestions(questions);
+        dispatch(setQuestions(questions));
       } 
 
       fetchQuestions();
 
     } , [page]);
 
-    const router = useRouter();
-    console.log(questions);
-    
-
+    const {tags} = useAppSelector(state=>state.questions);
 
   return (
-    <div className='bg-black h-[100vh]'>
+    <div className='h-[100vh]'>
           <Navbar/>
-          <div>
-          <h1 className='font-bold text-white p-2'>Problems:</h1>
-          { questions &&
-            (questions.map((question:any , index)=>(
-              <div key={index} className='text-white p-2' onClick={()=> router.push(`/problems/${page}/${question?.id}`)}>
-                <h1>{question.title}</h1>
-                <p>{question.description}</p>
-                <p>{question.difficulty}</p>
-              </div>
-            )))
-          } 
+          <div className='flex flex-col justify-center items-center'>
+          <h1 className='mt-20 md:mt-0 text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400'>Structured Questions</h1>
+          <SearchBar tags={tags}/>
+          <QuestionsTable/>
           </div>
     </div>
 

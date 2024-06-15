@@ -17,6 +17,7 @@ model User{
   id       String   @id @default(cuid())
   email    String   @unique
   firstName     String
+  token  String @default("") //look if we need this
   image String //migrate
   lastName      String
   username String @unique
@@ -42,6 +43,7 @@ model Question{
   constraints String[] //add search on basis of topics and on basis of names of questions
   createdAt DateTime @default(now())
   Submissions Submissions[]
+  //add companies
 }
 
 model Tag {
@@ -59,6 +61,7 @@ model Submissions{
   executedSpace Int
   Question Question @relation(fields: [questionId], references: [id])
   userId String
+  //add code to submision
   User User @relation(fields: [userId], references: [id])
   status SubmissionStatus
 }

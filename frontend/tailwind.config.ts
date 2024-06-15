@@ -18,6 +18,10 @@ const config = {
       },
     },
     extend: {
+      fontFamily:{
+        inter: ["var(--font-inter)"],
+        cedarville: ["var(--font-cedarville)"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

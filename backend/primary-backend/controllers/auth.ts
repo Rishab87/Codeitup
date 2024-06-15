@@ -2,13 +2,13 @@ import { Request, Response } from "express"
 import { z } from "zod"
 import prisma from "../config/prismaClient";
 import otpGenerator from 'otp-generator';
-import {redisClient} from '../config/redisClient';
+import {redisQueueClient} from '../config/redisClient';
 import {mailSender} from '../utils/mailSender';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const setOTP = (email:string, otp:string, expirySeconds:number) => {
-    redisClient.setEx(`otp:${email}`, expirySeconds, otp);
+const setOTP = async(email:string, otp:string, expirySeconds:number) => {
+    await redisQueueClient.set(email, otp , {EX:300});
 };
 
 export const sendOTP = async(req:Request, res: Response)=>{
@@ -23,17 +23,27 @@ export const sendOTP = async(req:Request, res: Response)=>{
         if(!zodValidation.success){
             return res.status(400).json({error: zodValidation.error})
         }
-
         const {email} = req.body;
+
+        const user = await prisma.user.findFirst({
+            where:{
+                email,
+            }
+        });
+
+        if(user){
+            return res.status(400).json({message: "User already exists , please login" , success:false});
+        }
+
         const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false  , lowerCaseAlphabets: false});
-        setOTP(email, otp, 300);
+        await setOTP(email, otp, 300);
 
         await mailSender(email, "OTP for Codeitup", `Your OTP is ${otp}`);
 
-        return res.status(201).json({message: "OTP sent successfully"})
+        return res.status(201).json({message: "OTP sent successfully" , success:true});
 
     } catch(error){
-        return res.status(500).json({error: (error as Error).message})
+        return res.status(500).json({error: (error as Error).message , success: false , message:"Internal server error"})
     }
 }
 
@@ -53,19 +63,22 @@ export const signup = async(req:Request, res: Response)=>{
               }, {
                 message: "Password must contain at least one uppercase ,  one lowercase letter , one number and one symbol."
               }),
+            confirmPassword: z.string().min(6),
             firstName: z.string(),
             lastName: z.string(),
             username: z.string(),
-            otp: z.string().length(6)
+            otp: z.string().length(6),
         })
         
         const zodValidation = signupSchema.safeParse(req.body);
 
         if(!zodValidation.success){
-            return res.status(400).json({error: zodValidation.error})
+            return res.status(400).json({error: zodValidation.error , success:false})
         }
 
-        const {email, password , firstName , lastName , username , otp} = req.body;
+        const {email, password , firstName , lastName , username , confirmPassword , otp} = req.body;
+        console.log(req.body);
+        
 
         const user  = await prisma.user.findFirst({
             where:{
@@ -74,7 +87,7 @@ export const signup = async(req:Request, res: Response)=>{
         })
 
         if(user){
-            return res.status(400).json({error: "Username already exists"})
+            return res.status(400).json({error: "Username already exists" , success:false})
         }
 
         const userByEmail = await prisma.user.findFirst({
@@ -83,18 +96,24 @@ export const signup = async(req:Request, res: Response)=>{
             }
         });
 
-        if(userByEmail){
-            return res.status(400).json({error: "Email already exists"})
+        if(confirmPassword !== password){
+            return res.status(400).json({error: "Password and confirm password do not match" , success:false})
         }
 
-        const otpFromRedis = await redisClient.get(email);
+        if(userByEmail){
+            return res.status(400).json({error: "Email already exists" , success:false})
+        }
+
+        const otpFromRedis = await redisQueueClient.get(email);
+        console.log(otpFromRedis , otp);
+        
 
         if(otpFromRedis !== otp){
-            return res.status(400).json({message: "Invalid OTP"})
+            return res.status(400).json({message: "Invalid OTP" , success:false})
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
+        
         const newUser = await prisma.user.create({
             data:{
                 email,
@@ -108,10 +127,11 @@ export const signup = async(req:Request, res: Response)=>{
 
         newUser.password = "undefined";
 
-        return res.status(201).json({message: "User created successfully", data: newUser})
+        return res.status(201).json({message: "User created successfully", data: newUser , success:true});
 
     } catch(error){
-        return res.status(500).json({error: (error as Error).message})
+        console.log(error);
+        return res.status(500).json({error: (error as Error).message , success:false})
     }
 }
 
@@ -145,8 +165,19 @@ export const login = async(req:Request, res: Response)=>{
         }
 
         const token = jwt.sign({id: user.id}, process.env.JWT_SECRET as string);
-        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+        const date = new Date();
+        res.cookie('token', token, { httpOnly: true, expires: new Date(date.getTime() + 365* 24 * 60 * 60 * 1000) ,  secure: process.env.NODE_ENV === 'production' });
         user.password = "undefined";
+
+        await prisma.user.update({
+            where:{
+                id: user.id,
+            },
+            data:{
+                token: token,
+            }
+        });
+        
         return res.status(200).json({message: "User logged in successfully", data: user , token,});
 
     } catch(error){

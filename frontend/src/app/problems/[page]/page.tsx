@@ -3,9 +3,9 @@
 import { getQuestionsByPage } from '@/apis/apiFunctions/questions';
 import Navbar from '@/components/Navbar';
 import React, { useEffect  , useState} from 'react'
-import SearchBar from './SearchBar';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/Typed-hooks';
-import { QuestionsTable } from './QuestionsTable';
+import SearchBar from './SearchBar';
+import QuestionsTable from './QuestionTable';
 import { setQuestions } from '@/redux-toolkit/slices/questions';
 
 const Page = ({params}:{params:{page:string}}) => {

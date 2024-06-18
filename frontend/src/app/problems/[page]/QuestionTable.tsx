@@ -18,6 +18,14 @@ import { Skeleton } from "@/components/ui/skeleton";
     const {questions} = useAppSelector(state=>state.questions);
     const router = useRouter();
 
+    if(questions?.length === 0){
+      return (
+        <div className="w-[50%]">
+          <h1 className="font-bold text-2xl">No questions found</h1>
+        </div>
+      )
+    }
+
     if(!questions){
         return(
             <Skeleton className="h-[70vh] w-[50%]"/>

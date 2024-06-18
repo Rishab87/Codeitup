@@ -5,6 +5,7 @@ import cors from 'cors';
 import {connectRedis, connectRedisQueue, redisClient} from '../config/redisClient';
 import WebSocket from 'ws';
 import prisma from '../config/prismaClient';
+import fileUploader from 'express-fileupload';
 import authRoutes from '../routes/auth';
 import profileRoutes from '../routes/profile'
 import problemSubmissionRoutes from '../routes/problemSubmission';
@@ -39,6 +40,10 @@ app.use(
 const wss = new WebSocket.Server({ port: 8080 });
 
 app.use(express.json());
+app.use(fileUploader({
+  useTempFiles: true, 
+  tempFileDir: '/tmp/',
+}));
 app.use(cookieParser());
 connectRedis();
 connectRedisQueue();
@@ -75,6 +80,7 @@ redisClient.subscribe('submissions' , async(message)=>{
         const {status , userId , questionId ,result , time , memory} = JSON.parse(message);
         //test cases will contain many objects with input and output key
         ////{input: , output:}
+        //minTim se zyada lga toh TLE , minTIME bhejo worker ko
         console.log("RESULT RECIEVED");
         
         //check all test cases in worker and then update status
@@ -96,7 +102,13 @@ redisClient.subscribe('submissions' , async(message)=>{
         //             }
         //         }
         //     } , 
+
         // });
+
+        //inc user points if easy question is easy then 1  , medium 2 , hard 3 
+        //update easy hard or med question in user profile
+        //handle streak cronjob chla skte hai jo har 24 hrs check kre kya user ne submit kiya hai question last 24 hrs agar haan toh kuch mt kro nhi toh streak 0
+        //update streak when submitting the question check difference between last submitted and current Time if more than 24 hrs streak++;
 
         const ws = clients.get(userId);
         if(ws){

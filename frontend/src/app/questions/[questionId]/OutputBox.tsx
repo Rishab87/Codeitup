@@ -7,19 +7,32 @@ import {
     TabsTrigger,
   } from "@/components/ui/tabs"
 
-const OutputBox = ({examples , message}:{examples:any , message:any}) => {
+const motivation = [
+    "You are doing great",
+    "You got this!",
+    "Less goo!",
+]
+
+const randomMotivation = () => {
+    return motivation[Math.floor(Math.random() * motivation.length)];
+}
+
+const OutputBox = ({examples , message , loading}:{examples:any , message:any , loading:boolean}) => {
 
 
-   if(!examples){
+   if(!examples || loading){
     return (
         <Skeleton className='h-full w-full'/>
     )
    }  
 
+   console.log(message);
+   
+
   return (
-    <div className='p-2'>
+    <div className='p-2 h-full w-full'>
         {
-            !message && (
+            !message && !loading && (
                 <Tabs defaultValue='test-case-1'>
                     <TabsList className='font-semibold grid grid-cols-2 w-[350px] text-center'> 
         
@@ -50,16 +63,43 @@ const OutputBox = ({examples , message}:{examples:any , message:any}) => {
             )
         }
         {
-            message && (
-                <div className='bg-gray-900 w-[350px] p-2 rounded-md'>
-                    <p className='p-2 h-fit w-fit'>{message.status}</p>
+            message && !loading && (
+                <div className={`w-full h-[70%] p-2 flex gap-2 flex-wrap justify-center items-center flex-col`}>
+                    <p className={`w-fit font-bold ${message.status == "ACCEPTED" ? " text-green-500": " text-red-500"} rounded-md`}>{message.status}</p>
                     {
-                        message.status == "Accepted" && (
-                           <div>
-                              <p className='p-2 h-fit w-fit'>{message.time}</p>
-                              <p>{message.memory}</p>
+                        message.status == "ACCEPTED" && (
+                            <p className='font-semibold text-center text-green-500'>{randomMotivation()}</p>
+                        )
+                    }                    {
+                        message.status == "ACCEPTED" && (
+                           <div className='flex gap-5 font-bold mt-2'>
+                              <p className='p-4 h-fit w-fit bg-green-300 text-green-500 rounded-md text-center'>Time Taken <br/>{message.time} s</p>
+                              <p className='bg-green-300 text-green-500 p-4 rounded-md text-center'>Memory Used <br/>{message.memory} MB</p>
+                              {/* //add better than % */}
                            </div>
                         )
+                    }
+                                        {
+                        message.status == "WRONG ANSWER" && (
+                           <div className='flex gap-40'>
+                            <div className='flex flex-col gap-1'>
+                                <p className='font-bold text-red-500 text-center'>Input</p>
+                                <p className='p-3 h-fit w-fit bg-red-300 text-red-500 rounded-md'>{message.result.input}</p>
+                            </div>
+                            <div className='flex flex-col gap-1'>
+                                <p className='font-bold text-red-500 text-center'>Output</p>
+                                <p className='p-3 h-fit w-fit bg-red-300 text-red-500 rounded-md'>{message.result.output}</p>
+                            </div>
+                           </div>
+                        )
+                    }
+
+                    {
+                        message.status.includes("ERROR") && (
+                            <div className='flex gap-40'>
+                                <p className='p-3 h-fit w-fit bg-red-300 text-red-500 rounded-md'>{message.result.output}</p>
+                           </div>
+                        )   
                     }
                 </div>
             )

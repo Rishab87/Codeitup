@@ -35,22 +35,22 @@ const Navbar = () => {
             <ul className='flex gap-7 ml-20 font-semibold text-gray-500'>
 
                 <Link href={'/'}>
-                    <li className={`${pathname == '/'? "text-white":"text-gray-500"} transition-all duration-200`}>Home</li>
+                    <li className={`${pathname == '/'? " text-gray-200":"text-gray-500"} transition-all duration-200`}>Home</li>
                 </Link>
 
                 <Link href={'/problems/1'}>
-                    <li className={`${pathname.includes('problems')? "text-white":"text-gray-500"} transition-all duration-200`}>Problems</li>
+                    <li className={`${pathname.includes('problems')? "text-gray-200":"text-gray-500"} transition-all duration-200`}>Problems</li>
                 </Link>
 
                 <Link href={'/contests'}>
-                    <li className={`${pathname == '/contests'? "text-white":"text-gray-500"} transition-all duration-200`}>Contests</li>
+                    <li className={`${pathname == '/contests'? "text-gray-200":"text-gray-500"} transition-all duration-200`}>Contests</li>
                 </Link>
 
                 <Link href={'/redeem'}>
-                    <li className={`${pathname == '/redeem'? "text-white":"text-gray-500"} transition-all duration-200`}>Redeem</li>
+                    <li className={`${pathname == '/redeem'? "text-gray-200":"text-gray-500"} transition-all duration-200`}>Redeem</li>
                 </Link>
                 <Link href={'/roadmaps'}>
-                    <li className={`${pathname == '/roadmaps'? "text-white":"text-gray-500"} transition-all duration-200`}>Roadmaps</li>
+                    <li className={`${pathname == '/roadmaps'? "text-gray-200":"text-gray-500"} transition-all duration-200`}>Roadmaps</li>
                 </Link>
             </ul>
         </div>

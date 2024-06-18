@@ -26,7 +26,7 @@ const Page = ({params}:{params:{questionId:string}}) => {
 
     const [question , setQuestion] = useState<any>();
     const [message, setMessage] = useState<any>(null);
-
+    const [ loading , setLoading] = useState<boolean>(false);
 
 
 
@@ -79,11 +79,11 @@ const Page = ({params}:{params:{questionId:string}}) => {
         <ResizablePanel defaultSize={70}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={60}>
-                <CodeEditor config={question?.config} questionId={question?.id} setMessage={setMessage}/>
+                <CodeEditor config={question?.config} questionId={question?.id} setMessage={setMessage} setLoading={setLoading} loading={loading}/>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={40}>
-              <OutputBox examples={question?.examples} message={message}/>
+              <OutputBox examples={question?.examples} message={message} loading = {loading}/>
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>

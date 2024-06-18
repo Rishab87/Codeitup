@@ -3,6 +3,7 @@ const url = "http://localhost:4000/api/v1"
 export const questionEndpoints = {
     getQuestionsByPage: `${url}/questions/questionsByPage`,
     getQuestionsById: `${url}/questions/`,
+    getQuestionsByFilter: `${url}/questions/filterQuestions`
 }
 
 export const submissionEndpoints = {

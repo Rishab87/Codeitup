@@ -18,11 +18,18 @@ model User{
   email    String   @unique
   firstName     String
   token  String @default("") //look if we need this
-  image String //migrate
+  image String 
   lastName      String
+  easy    Int @default(0)
+  medium Int @default(0)
+  hard  Int @default(0) //migrate
   username String @unique
   createdAt DateTime @default(now())
   skills String[] @default([])
+  linkedinUrl String @default("")
+  githubUrl String @default("")
+  instagramUrl String @default("")
+  youtubeUrl String @default("") //migrate
   Streak Int @default(0) //on this platform user can mail us with the question idea with its test cases and admin will have a dashboard from where he can add the question and test cases
   password String
   points    Int    @default(0) //user will get points based on the speed of execution and space complexity // eg 10 points if it gets executed in this much time 5 pts if it took this much space
@@ -71,4 +78,5 @@ enum SubmissionStatus {
   ACCEPTED
   TIME_LIMIT_EXCEEDED
   RUNTIME_ERROR
+  COMPILE_TIME_ERROR //migrate
 }

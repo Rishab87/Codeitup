@@ -4,6 +4,6 @@ import {auth} from '../middlewares/auth';
 
 const router = express.Router();
 
-router.post('/submit-problem', submitProblem);
+router.post('/submit-problem', auth , submitProblem);
 
 export default router;

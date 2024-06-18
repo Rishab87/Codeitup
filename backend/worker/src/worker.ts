@@ -27,6 +27,7 @@ export async function worker(){
             let status = "ACCEPTED";
             let time = 0;
             let memory = 0;
+            let lastExInput;
             
             console.log("running test cases");
             try{
@@ -36,6 +37,18 @@ export async function worker(){
                 result = await runCode(userSubmission.code, userSubmission.language, input);
                 time += result.time!;
                 memory += result.memory;
+                if (result.output.includes('error') || result.output.includes('Error')) {
+                    if (isCompileError(result.output , userSubmission.language)) {
+                        lastExInput = input
+                        status = 'COMPILE TIME ERROR';
+                        break;
+                    } else {
+                        lastExInput = input
+                        status = 'RUNTIME ERROR';
+                        break;
+                    }
+                }
+    
                 if(result.time === null){
                     
                     status = "RUNTIME ERROR";
@@ -44,6 +57,7 @@ export async function worker(){
 
                 if (result.output.trim() !== expectedOutput.trim()) {
                     status = "WRONG ANSWER";
+                    lastExInput = input
                     break;
                 }
             }
@@ -56,7 +70,7 @@ export async function worker(){
                 status,
                 userId: userSubmission.userId,
                 questionId: userSubmission.questionId,
-                result: result.output,
+                result: {output: result.output , input: lastExInput},
                 time,
                 memory,
             }
@@ -72,6 +86,18 @@ export async function worker(){
         console.log(error);
     }
 }
+
+const isCompileError = (errorOutput: string, language: string) => {
+    // Add language-specific compile error patterns here
+    const patterns: { [key: string]: RegExp } = {
+        python: /SyntaxError|IndentationError|ModuleNotFoundError/,
+        javascript: /SyntaxError|ReferenceError|TypeError|ModuleNotFoundError/,
+        cpp: /error:|undefined reference to/
+    };
+
+    return patterns[language].test(errorOutput);
+};
+
 
 // const createContainer = async(image:string , compileCmd:string , runCmd:string , input:string):Promise<any>=>{
 //     try{
@@ -154,13 +180,14 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
     return await  new Promise((resolve, reject) => {
         let output = '';
         let errorOutput = '';
+        // let timeout: NodeJS.Timeout;
         stream.on('data', (chunk:any) => {
     
             output += chunk.toString();
         });
 
         stream.on('end', async() => {
-
+            // clearTimeout(timeout);
             // const exitCode = await container.inspect().then(data => data.State.ExitCode);
 
             // Check if the container exited with a non-zero exit code
@@ -187,6 +214,9 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
 
             const stats = await docker.getContainer(container.id).stats({ stream: false });
             const memoryUsage = stats.memory_stats ? ((stats.memory_stats.usage) / (1024 * 1024)) : 0;
+            console.log(stats.memory_stats);
+            console.log(errorOutput);
+            
             let timeOutput = parseTimeOutput(errorOutput);
             console.log(memoryUsage  , timeOutput , output);
             if(timeOutput === null){
@@ -210,6 +240,13 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
             reject(err);
             await container.remove();
         });
+
+        // timeout = setTimeout(async () => {
+        //     await container.kill();
+        //     resolve({ output: '', time: null, memory: 0, status: 'TIME LIMIT EXCEEDED' });
+        //     console.log("Code execution timed out");
+        //     await container.remove();
+        // }, userSubmission.minTime);
     })
     //remove container if it failed otherwise use the same container if possible and if its a good practice
 

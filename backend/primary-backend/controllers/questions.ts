@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prismaClient';
 import {z} from 'zod';
+import { Prisma } from '@prisma/client';
 
 export const getQuestionsByPage = async(req:Request, res: Response)=>{
     try{
 
         const {page} = req.body;
 
-        if(!page) return res.status(400).json({message: "Page number is required"});
+        if(!page) return res.status(400).json({message: "Page number is required" , success: false});
 
         const pageSize = 50;
         const skip = (parseInt(page) - 1) * pageSize;
@@ -32,55 +33,46 @@ export const getQuestionsByPage = async(req:Request, res: Response)=>{
     }
 }
 
-export const getQuestionsByTag = async(req:Request, res: Response)=>{
+export const getQuestionsByTagDifficultyAndSearch= async(req:Request , res: Response)=>{
     try{
 
-        const {tag} = req.body;
+        const {search , tag , difficulty} = req.body;
 
-        if(!tag) return res.status(400).json({message: "Tag is required"});
+        if(!search || !tag || !search) return res.status(400).json({message: "Tag and Difficulty required" , success:false});
 
-        const questions = await prisma.question.findMany({
-            where:{
-                tags:{
-                    some:{
-                        name: tag
+        const where: Prisma.QuestionWhereInput = {};
+
+        if(search !== ""){
+            where.title = {
+                contains: search,
+                mode: "insensitive"
+            };
+        }
+        if(tag !== ""){
+            where.tags =  {
+                some:{
+                    name:{
+                        in:tag
                     }
                 }
-            }
-        });
+            };
+        }
 
-        if(!questions) return res.status(404).json({message: "No questions found for this tag"});
-
-        return res.status(201).json({data: questions});
-
-    } catch(error){
-        return res.status(500).json({error: (error as Error).message})
-    }
-
-}
-
-export const getQuestionsBySearch = async(req:Request, res: Response)=>{
-    try{
-
-        const {search} = req.body;
-
-        if(!search) return res.status(400).json({message: "Search query is required"});
+        if(difficulty !== ""){
+            where.difficulty = difficulty;
+        }
 
         const questions = await prisma.question.findMany({
-            where:{
-                title:{
-                    contains: search
-                }
+            where,
+            include:{
+                tags:true
             }
-        });
+        });;
 
-        if(!questions) return res.status(404).json({message: "No questions found for this search query"});
-
-        return res.status(201).json({data: questions});
-
+        return res.status(200).json({success: true , data: questions});
 
     } catch(error){
-        return res.status(500).json({error: (error as Error).message})
+        return res.status(500).json({error: (error as Error).message , success: false})   
     }
 }
 

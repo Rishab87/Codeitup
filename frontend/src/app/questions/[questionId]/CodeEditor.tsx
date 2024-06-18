@@ -6,11 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
-const CodeEditor = ({config , questionId , setMessage}:{config:any , questionId:string , setMessage: Function}) => {
+const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{config:any , questionId:string , setMessage: Function , setLoading:Function , loading:boolean}) => {
 
     const [language , setLanguage] = React.useState<string>('cpp')
     const [theme , setTheme] = React.useState<string>('vs-dark')
-    const [loading , setLoading] = React.useState<boolean>(false) 
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [code , setCode] = useState<string | undefined>("");
@@ -39,11 +38,10 @@ const CodeEditor = ({config , questionId , setMessage}:{config:any , questionId:
         
         socket.onmessage = (message)=>{
             console.log("Message from server: " + message.data);
-            setMessage(message.data);
+            setMessage(JSON.parse(message.data));
             setLoading(false);
             socket.close();
         }
-        setLoading(false); //remove this line
     }
 
 

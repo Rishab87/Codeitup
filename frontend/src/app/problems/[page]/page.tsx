@@ -15,14 +15,14 @@ const Page = ({params}:{params:{page:string}}) => {
 
     const dispatch = useAppDispatch();
 
+    const fetchQuestions = async()=>{
+      const questions  = await getQuestionsByPage(page);
+      //fetch questions acc to page
+      dispatch(setQuestions(questions));
+    } 
+
+
     useEffect(()=>{
-
-      const fetchQuestions = async()=>{
-        const questions  = await getQuestionsByPage(page);
-        //fetch questions acc to page
-        dispatch(setQuestions(questions));
-      } 
-
       fetchQuestions();
 
     } , [page]);
@@ -33,8 +33,8 @@ const Page = ({params}:{params:{page:string}}) => {
     <div className='h-[100vh]'>
           <Navbar/>
           <div className='flex flex-col justify-center items-center gap-10'>
-          <h1 className='mt-20 md:mt-0 text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400'>Structured Questions</h1>
-          <SearchBar/>
+          <h1 className='mt-20 md:mt-0 text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-300 to-neutral-600'>Structured Questions</h1>
+          <SearchBar fetchQuestions = {fetchQuestions}/>
           <QuestionsTable/>
           </div>
     </div>

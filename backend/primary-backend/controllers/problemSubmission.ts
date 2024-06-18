@@ -39,6 +39,7 @@ export const submitProblem = async(req:Request, res: Response)=>{
             userId,
             testCases: question?.testCases,
             config: question?.config,
+            minTime: question?.minTime,
         }
 
         await redisQueueClient.lPush("submissions", JSON.stringify(problemSubmission));

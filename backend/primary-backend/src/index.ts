@@ -11,6 +11,7 @@ import profileRoutes from '../routes/profile'
 import problemSubmissionRoutes from '../routes/problemSubmission';
 import questionRoutes from '../routes/questions';
 import { SubmissionStatus } from '@prisma/client';
+import { cloudinaryConnect } from '../config/cloudinary';
 
 const app = express();
 dotenv.config();
@@ -47,6 +48,7 @@ app.use(fileUploader({
 app.use(cookieParser());
 connectRedis();
 connectRedisQueue();
+cloudinaryConnect();
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/problem-submission', problemSubmissionRoutes);
@@ -60,13 +62,21 @@ let clients = new Map();
 wss.on('connection', function connection(ws , req) {
     console.log("CONNECTED TO WEBSOCKET");
 
-    const userId = req.headers['user-id'];
-    clients.set(userId, ws);
+    
+    ws.on('message', function incoming(message) {
+      const messageString = message.toString(); // Convert the buffer to a string
+      const tokenObj = JSON.parse(messageString);
+      if(!tokenObj.close){
+        clients.set(tokenObj.userId , ws);
+      }
+      else
+        clients.delete(tokenObj.userId);
+    });
 
     //send result of problem to frontend
 
     ws.on('close', () => {
-        clients.delete(userId);
+        console.log("CONNECTION CLOSED");
     });
     
 });
@@ -77,7 +87,7 @@ wss.on('connection', function connection(ws , req) {
 
 //shyd await krna pdega
 redisClient.subscribe('submissions' , async(message)=>{
-        const {status , userId , questionId ,result , time , memory} = JSON.parse(message);
+        const {status , userId , questionId ,result , time , memory , difficulty , userCode} = JSON.parse(message);
         //test cases will contain many objects with input and output key
         ////{input: , output:}
         //minTim se zyada lga toh TLE , minTIME bhejo worker ko
@@ -86,24 +96,53 @@ redisClient.subscribe('submissions' , async(message)=>{
         //check all test cases in worker and then update status
         //result is output which I will use in case of error or wrong answer and status is the final status of submission
 
-        // await prisma.submissions.create({
-        //     data:{
-        //         status: SubmissionStatus.RUNTIME_ERROR,
-        //         executedSpace: time,
-        //         executedTime: memory,
-        //         Question: {
-        //             connect: {
-        //                 id: questionId
-        //             }
-        //         },
-        //         User: {
-        //             connect: {
-        //                 id: userId
-        //             }
-        //         }
-        //     } , 
+        let subStatus:SubmissionStatus = SubmissionStatus.ACCEPTED;
 
-        // });
+        if(status === "COMPILE TIME ERROR"){
+          subStatus = SubmissionStatus.COMPILE_TIME_ERROR;
+        } else if(status == "RUNTIME ERROR"){
+          subStatus = SubmissionStatus.RUNTIME_ERROR;
+        } else if(status == "WRONG ANSWER"){
+          subStatus = SubmissionStatus.WRONG_ANSWER;
+        } else if(status == "TIME LIMIT EXCEEDED"){
+          subStatus = SubmissionStatus.TIME_LIMIT_EXCEEDED
+        }
+
+        await prisma.submissions.create({
+            data:{
+                status: subStatus,
+                executedSpace: time,
+                executedTime: 0,
+                code: userCode,
+                Question: {
+                    connect: {
+                        id: questionId
+                    }
+                },
+                User: {
+                    connect: {
+                        id: userId
+                    }
+                }
+            } , 
+
+        });
+
+        
+        const updateData = {
+          [difficulty]: {
+            increment: 1,
+          },
+          points: {
+            increment: 1,
+          }
+        };
+        await prisma.user.update({
+          where:{
+            id: userId,
+          },
+          data: updateData,
+        });
 
         //inc user points if easy question is easy then 1  , medium 2 , hard 3 
         //update easy hard or med question in user profile
@@ -111,8 +150,10 @@ redisClient.subscribe('submissions' , async(message)=>{
         //update streak when submitting the question check difference between last submitted and current Time if more than 24 hrs streak++;
 
         const ws = clients.get(userId);
+        
         if(ws){
-            ws.send(JSON.stringify({status , result}));
+          console.log("SENDIN RES");
+          ws.send(JSON.stringify({status , result , time  , memory}));
         }
     }
 );

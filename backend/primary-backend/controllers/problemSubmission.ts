@@ -15,6 +15,7 @@ export const submitProblem = async(req:Request, res: Response)=>{
             questionId: z.string(),
             code: z.string(),
             language: z.string(),
+            userCode: z.string(),
         });
 
         const zodValidation = submitProblemSchema.safeParse(req.body);
@@ -23,7 +24,7 @@ export const submitProblem = async(req:Request, res: Response)=>{
             return res.status(400).json({error: zodValidation.error})
         }
 
-        const {questionId , code , language} = req.body;
+        const {questionId , code , language , userCode} = req.body;
         const {userId} = req.body;
 
         const question = await prisma.question.findFirst({
@@ -40,6 +41,8 @@ export const submitProblem = async(req:Request, res: Response)=>{
             testCases: question?.testCases,
             config: question?.config,
             minTime: question?.minTime,
+            difficulty: question?.difficulty,
+            userCode
         }
 
         await redisQueueClient.lPush("submissions", JSON.stringify(problemSubmission));

@@ -24,7 +24,6 @@ const Page = ({params}:{params:{page:string}}) => {
 
     useEffect(()=>{
       fetchQuestions();
-
     } , [page]);
 
     const {tags} = useAppSelector(state=>state.questions);

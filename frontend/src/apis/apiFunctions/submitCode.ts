@@ -2,9 +2,9 @@ import { apiConnector } from "../apiConnector";
 import { submissionEndpoints } from "../apiEndpoints";
 
 
-export const submitProblem = async (code: string , language:string , questionId:string) => {
+export const submitProblem = async (code: string , language:string , questionId:string , userCode:string | null) => {
     try{
-        const response = await apiConnector("POST" , submissionEndpoints.submitCode , {code , language , questionId} , {} , {});
+        const response = await apiConnector("POST" , submissionEndpoints.submitCode , {code , language , questionId , userCode} , {} , {});
         console.log(response);
         
         if(response.status === 500){

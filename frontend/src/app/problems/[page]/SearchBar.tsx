@@ -23,7 +23,7 @@ const SearchBar = ({fetchQuestions}: {fetchQuestions:Function}) => {
 
     const searchAPI = async()=>{
       dispatch(setQuestions(null));
-      const questions= await getQuestionsByFilter(tag , difficulty , search);
+      const questions= await getQuestionsByFilter(tag.toLocaleLowerCase() , difficulty , search);
       dispatch(setQuestions(questions));
 
     }
@@ -34,7 +34,7 @@ const SearchBar = ({fetchQuestions}: {fetchQuestions:Function}) => {
         fetchQuestions();
         return;
       }
-
+      
       searchAPI();
 
     } , [search , tag , difficulty]);
@@ -47,10 +47,10 @@ const SearchBar = ({fetchQuestions}: {fetchQuestions:Function}) => {
 
   return (
     <div className='flex gap-3'>
-        <Input placeholder='Search for problems' onChange={(e)=>setSearch(e.target.value)}/>
+        <Input placeholder='Search for problems' onChange={(e)=>setSearch(e.target.value)} value={search}/>
         <SelectMenu topic={"tag"} setState={setTag} options={tags}/>
         <SelectMenu topic={"difficulty"} setState={setDifficulty} options={difficultyOptions}/>
-        <p className='font-bold text-red-500 text-lg' onClick={removeFilters}>Remove</p>
+        <p className='font-semibold text-red-500 text-lg cursor-pointer' onClick={removeFilters}>Clear</p>
     </div>
   )
 }

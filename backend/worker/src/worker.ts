@@ -1,5 +1,7 @@
 import { redisClient, redisQueueClient } from "../config/redis";
 import Docker from 'dockerode';
+import fs from 'fs';
+import path from 'path';
 
 interface Result {
     time: number | null;
@@ -35,8 +37,8 @@ export async function worker(){
                 const { input, output: expectedOutput } = testCase;
 
                 result = await runCode(userSubmission.code, userSubmission.language, input);
-                time += result.time!;
-                memory += result.memory;
+                time  = Math.max(time , result.time!);
+                memory = Math.max(memory , result.memory);
                 if (result.output.includes('error') || result.output.includes('Error')) {
                     if (isCompileError(result.output , userSubmission.language)) {
                         lastExInput = input
@@ -48,14 +50,7 @@ export async function worker(){
                         break;
                     }
                 }
-    
-                if(result.time === null){
-                    
-                    status = "RUNTIME ERROR";
-                    break;
-                }
-
-                if (result.output.trim() !== expectedOutput.trim()) {
+                else if (result.output.trim() !== expectedOutput.trim()) {
                     status = "WRONG ANSWER";
                     lastExInput = input
                     break;
@@ -73,6 +68,8 @@ export async function worker(){
                 result: {output: result.output , input: lastExInput},
                 time,
                 memory,
+                difficulty: userSubmission.difficulty,
+                userCode: userSubmission.userCode
             }
             console.log(resultObj);
             
@@ -176,6 +173,7 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
 
     console.log("STREAM STARTED");
 
+    const start = Date.now();
 
     return await  new Promise((resolve, reject) => {
         let output = '';
@@ -187,6 +185,7 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
         });
 
         stream.on('end', async() => {
+            const executionTime = Date.now() - start;
             // clearTimeout(timeout);
             // const exitCode = await container.inspect().then(data => data.State.ExitCode);
 
@@ -213,25 +212,21 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
         
 
             const stats = await docker.getContainer(container.id).stats({ stream: false });
-            const memoryUsage = stats.memory_stats ? ((stats.memory_stats.usage) / (1024 * 1024)) : 0;
+            console.log(stats);
+            const memoryUsage = stats.memory_stats  ? ((stats.memory_stats.usage) / (1024 * 1024)) : 0;
             console.log(stats.memory_stats);
-            console.log(errorOutput);
+        
+            console.log(memoryUsage  , executionTime , output);
             
-            let timeOutput = parseTimeOutput(errorOutput);
-            console.log(memoryUsage  , timeOutput , output);
-            if(timeOutput === null){
-                timeOutput = 0;
-            }    
-            resolve({ output: response, time: timeOutput, memory: memoryUsage });
+            resolve({ output: response, time: executionTime/1000, memory: memoryUsage });
             console.log("CODE EXECUTED");
             await container.remove();
-            // resolve(output);
         });
         stream.on('stderr', async(chunk: any) => {
             errorOutput += chunk.toString();
             console.log(errorOutput);
             
-            resolve({ time: null, memory: 0, output: errorOutput });
+            resolve({ time: 0, memory: 0, output: errorOutput });
             console.log("CODE  STD ERR EXECUTED");
             await container.remove();
         });
@@ -251,16 +246,6 @@ const runCode = async(code: string , language:string , input:string):Promise<Res
     //remove container if it failed otherwise use the same container if possible and if its a good practice
 
 }
-
-
-const parseTimeOutput = (output:string) => {
-    const realTimeRegex = /real\s+(\d+\.\d+)/;
-    const realTimeMatch = output.match(realTimeRegex);
-    const realTime = realTimeMatch ? parseFloat(realTimeMatch[1]) : null;
-    return realTime ? Math.round(realTime) : null;
-};
-
-//in DB divide config three parts for every language headers , function execution  , show just function part add headers function and excecution and send 
 
 const getConfig = (language:string, code:string , input:string) => {
     switch (language) {

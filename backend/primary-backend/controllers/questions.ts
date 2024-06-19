@@ -38,8 +38,6 @@ export const getQuestionsByTagDifficultyAndSearch= async(req:Request , res: Resp
 
         const {search , tag , difficulty} = req.body;
 
-        if(!search || !tag || !search) return res.status(400).json({message: "Tag and Difficulty required" , success:false});
-
         const where: Prisma.QuestionWhereInput = {};
 
         if(search !== ""){
@@ -52,7 +50,7 @@ export const getQuestionsByTagDifficultyAndSearch= async(req:Request , res: Resp
             where.tags =  {
                 some:{
                     name:{
-                        in:tag
+                        in:[tag]
                     }
                 }
             };
@@ -72,6 +70,7 @@ export const getQuestionsByTagDifficultyAndSearch= async(req:Request , res: Resp
         return res.status(200).json({success: true , data: questions});
 
     } catch(error){
+        console.log(error);
         return res.status(500).json({error: (error as Error).message , success: false})   
     }
 }

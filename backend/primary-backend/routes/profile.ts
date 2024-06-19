@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkForUsername , updateProfileDetails , updateSocials , updateProfilePicture } from '../controllers/profile';
+import { checkForUsername , updateProfileDetails , updateProfilePicture , updateSocials } from '../controllers/profile';
 import { auth } from '../middlewares/auth';
 
 const router = express.Router();

@@ -5,17 +5,24 @@ import Editor, { DiffEditor, useMonaco, loader } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { useAppSelector } from '@/redux-toolkit/Typed-hooks';
 
 const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{config:any , questionId:string , setMessage: Function , setLoading:Function , loading:boolean}) => {
 
     const [language , setLanguage] = React.useState<string>('cpp')
     const [theme , setTheme] = React.useState<string>('vs-dark')
+    const {token , user} = useAppSelector(state=>state.auth);
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [code , setCode] = useState<string | undefined>("");
 
 
     const submitCode = async()=>{
+
+        if(!token){
+            toast("Please login to submit code");
+            return;
+        }
 
         if(code === ""){
             toast("Please write something");
@@ -27,6 +34,7 @@ const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{c
         const socket = new WebSocket("ws://localhost:8080");
         socket.onopen = () => {
         setSocket(socket);
+        socket.send(JSON.stringify({userId: user.id , close: false}));
         console.log("Connected to server");
         }
         
@@ -34,16 +42,17 @@ const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{c
         console.log(code + config[language].executionCode);
 
 
-        await submitProblem(code + '\n' + config[language].executionCode , language , questionId);
-        
+        await submitProblem(code + '\n' + config[language].executionCode , language , questionId , code!);
+
         socket.onmessage = (message)=>{
             console.log("Message from server: " + message.data);
             setMessage(JSON.parse(message.data));
             setLoading(false);
+            socket.send(JSON.stringify({userId: user.id , close: true}));
             socket.close();
         }
-    }
 
+    }
 
   return (
     <div className='flex gap-3 pt-2 pl-2 h-full w-full flex-col'>

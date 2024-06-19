@@ -8,8 +8,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 interface RequestWithUserId extends Request{
-    userId: string;
-    files: any;
+    userId?: string;
+    files?: any;
 }
 
 export const checkForUsername = async(req:Request, res: Response)=>{

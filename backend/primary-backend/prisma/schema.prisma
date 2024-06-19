@@ -66,6 +66,7 @@ model Submissions{
   questionId String
   executedTime Int
   executedSpace Int
+  code String
   Question Question @relation(fields: [questionId], references: [id])
   userId String
   //add code to submision

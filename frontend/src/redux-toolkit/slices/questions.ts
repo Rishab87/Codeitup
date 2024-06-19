@@ -1,12 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 type questionState = {
-    questions: any[],
+    questions: any[] | null,
     tags: string[],
 }
 
 const initialState: questionState = {
-    questions: [],
+    questions: null,
     tags: [
         'Array',
         'String',

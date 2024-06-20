@@ -77,7 +77,7 @@ const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{c
         }
         {
             !config && (
-                <Skeleton className='h-full w-full'/>
+                <Skeleton className='h-full w-full p-2'/>
             )
         }
 

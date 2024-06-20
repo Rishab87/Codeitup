@@ -22,7 +22,7 @@ const OutputBox = ({examples , message , loading}:{examples:any , message:any , 
 
    if(!examples || loading){
     return (
-        <Skeleton className='h-full w-full'/>
+        <Skeleton className='h-full w-full p-2'/>
     )
    }  
 

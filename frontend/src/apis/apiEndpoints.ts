@@ -18,7 +18,8 @@ export const authEndpoints = {
     changePassword: `${url}/auth/change-password`,
     sendOtp: `${url}/auth/send-otp`,
     cookieLogin: `${url}/auth/cookie-login`,
-    expireCookie: `${url}/auth/expire-cookie`
+    expireCookie: `${url}/auth/expire-cookie`,
+    nextAuth: `${url}/auth/next-auth`
 }
 
 export const profileEndpoints = {

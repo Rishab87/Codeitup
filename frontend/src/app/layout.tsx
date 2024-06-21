@@ -5,7 +5,7 @@ import {ThemeProvider} from "next-themes";
 import { Providers } from "@/redux-toolkit/Provider";
 import { Cedarville_Cursive } from 'next/font/google'
 import { Toaster } from "@/components/ui/sonner"
-
+import SessionProviers from "@/SessionProviers";
 const inter = Inter({ subsets: ["latin"] , variable: '--font-inter' });
 const cedarville = Cedarville_Cursive({subsets: ['latin'] ,weight: '400' , style: ['normal'] , variable: '--font-cedarville'});
 
@@ -31,7 +31,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
           <Providers>
-            {children}
+            <SessionProviers>
+              {children}
+            </SessionProviers>
           </Providers>
           <Toaster/>
         </ThemeProvider>

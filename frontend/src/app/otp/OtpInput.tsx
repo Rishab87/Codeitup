@@ -22,8 +22,7 @@ export function InputOTPControlled() {
   const signupAPI = async(e:any)=>{
     e.preventDefault();
     const {email , password , confirmPassword , username , firstName , lastName} = user;
-    await signup({email , password , confirmPassword , username , firstName , lastName , otp: value} , router);
-    dispatch(setUser(null));
+    await signup({email , password , confirmPassword , username , firstName , lastName , otp: value} , router , dispatch);
   }
 
   const sendotpAPI = async(e:any)=>{

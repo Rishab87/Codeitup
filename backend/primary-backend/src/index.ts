@@ -111,8 +111,8 @@ redisClient.subscribe('submissions' , async(message)=>{
         await prisma.submissions.create({
             data:{
                 status: subStatus,
-                executedSpace: time,
-                executedTime: 0,
+                executedSpace: memory,
+                executedTime: time,
                 code: userCode,
                 Question: {
                     connect: {

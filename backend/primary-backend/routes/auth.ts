@@ -1,5 +1,5 @@
 import express from 'express';
-import {signup ,login , changePassword , forgotPasswordToken , forgotPassword , sendOTP} from '../controllers/auth'
+import {signup ,login , changePassword , forgotPasswordToken , forgotPassword , sendOTP, nextAuth} from '../controllers/auth'
 import { auth } from '../middlewares/auth';
 import prisma from '../config/prismaClient';
 
@@ -11,6 +11,7 @@ router.post('/change-password', auth, changePassword);
 router.post('/forgot-password-token', forgotPasswordToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/send-otp', sendOTP);
+router.post('/next-auth' , nextAuth);
 router.post('/cookie-login', auth, async(req, res) => {
     try{
 

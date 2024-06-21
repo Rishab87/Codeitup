@@ -20,10 +20,11 @@ import { useAppDispatch, useAppSelector } from "@/redux-toolkit/Typed-hooks"
 import { useRouter } from "next/navigation"
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema } from './formSchema';
-import { sendotp } from "@/apis/apiFunctions/auth"
-import { setUser } from "@/redux-toolkit/slices/auth"
+import { googleLogin, sendotp } from "@/apis/apiFunctions/auth"
+import { setUser , setToken } from "@/redux-toolkit/slices/auth"
 import { usernameAvailable } from "@/apis/apiFunctions/profile"
 import {useCallback} from 'react'
+import { signIn, useSession } from "next-auth/react";
 
 
 export function CardWithForm() {
@@ -54,7 +55,7 @@ export function CardWithForm() {
 
       const [usernameStatus , setUsernameStatus] = React.useState<number | null>(null);
       const [loading , setLoading] = React.useState<boolean>(false);
-
+      
     const checkUsername = async(username:string)=>{
         if(username === ""){
             toast("Please enter username")
@@ -68,11 +69,39 @@ export function CardWithForm() {
             return;
         }
         console.log(data);
+        setLoading(true);
         
         console.log(data);
         dispatch(setUser(data));
         await sendotp(data.email , router);
+        setLoading(false);
     }
+
+    const { data: session, status } = useSession();
+
+    const googleSigninApiCall = async()=>{
+      setLoading(true);
+      const res = await googleLogin();
+      console.log(res);
+      dispatch(setToken(res.data.data));
+      dispatch(setUser(res.data.token));
+      setLoading(false);
+      router.push('/problems/1');
+    }
+
+    React.useEffect(()=>{
+      if (status === 'authenticated'){
+        toast("Logging in");
+       googleSigninApiCall();
+      }
+    } , [status]);
+
+    const googleSiginHandler = async()=>{
+        setLoading(true);
+        toast("Signing in");
+        await signIn('google');
+        setLoading(false);
+      }
 
     
     if(token){
@@ -80,6 +109,7 @@ export function CardWithForm() {
     }
 
   return (
+    <div className="flex flex-col gap-5">
     <Card className="w-[450px] mt-10">
       <CardHeader>
         <CardTitle>Singup</CardTitle>
@@ -184,10 +214,17 @@ export function CardWithForm() {
        
         </CardContent>
         <CardFooter className="flex justify-center">
-            <Button type="submit">Signup</Button>
+            <Button type="submit" disabled={loading}>Signup</Button>
         </CardFooter>
       </form>
 
     </Card>
+     <Button onClick={googleSiginHandler} className="flex justify-center gap-3" disabled={loading}>
+              
+     <img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" alt="google" width={20} height={20} />
+ 
+       Continue With Google
+    </Button>
+    </div>
   )
 }

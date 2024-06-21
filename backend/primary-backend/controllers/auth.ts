@@ -6,10 +6,21 @@ import {redisQueueClient} from '../config/redisClient';
 import {mailSender} from '../utils/mailSender';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import {v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 const setOTP = async(email:string, otp:string, expirySeconds:number) => {
     await redisQueueClient.set(email, otp , {EX:300});
 };
+
+function generateUniqueUsername(firstName:string) {
+    const uniqueId = uuidv4();
+    return `${firstName}_${uniqueId.slice(0, 8)}`;
+}
+
+function generateRandomPassword(length = 12) {
+    return crypto.randomBytes(length).toString('base64').slice(0, length);
+}
 
 export const sendOTP = async(req:Request, res: Response)=>{
     try{
@@ -306,5 +317,59 @@ export const forgotPassword = async(req:Request, res: Response)=>{
 
     } catch(error){
         return res.status(500).json({error: (error as Error).message})
+    }
+}
+
+export const nextAuth = async(req:Request , res:Response)=>{
+    try{
+
+        const {email , name} = req.body;
+        if(!email || !name){
+            return res.status(400).json({success: false , message: "Email and name are required"})
+        }
+
+        const firstName = name.split(' ')[0];
+        const lastName = name.split(' ')[1];
+
+        let user = await prisma.user.findFirst({
+            where:{
+                email
+            }
+        });
+
+    
+        if(!user){
+
+            const hashedPassword = await bcrypt.hash(generateRandomPassword() , 10);
+            user = await prisma.user.create({
+                data:{
+                    email,
+                    firstName,
+                    lastName,
+                    image: `https://api.dicebear.com/8.x/thumbs/svg?seed=${name}`,
+                    password: hashedPassword,
+                    username: generateUniqueUsername(firstName),
+                }
+            });
+        }
+
+        const token = jwt.sign({id: user.id}, process.env.JWT_SECRET as string);
+        const date = new Date();
+        res.cookie('token', token, { httpOnly: true, expires: new Date(date.getTime() + 365* 24 * 60 * 60 * 1000) ,  secure: process.env.NODE_ENV === 'production' });
+        user.password = "undefined";
+
+        await prisma.user.update({
+            where:{
+                id: user.id,
+            },
+            data:{
+                token: token,
+            }
+        });
+        
+        return res.status(200).json({success: true , message: "User created successfully" , data:user , token});
+
+    } catch(error){
+        return res.status(500).json({success: false , message: "Internal server error"});
     }
 }

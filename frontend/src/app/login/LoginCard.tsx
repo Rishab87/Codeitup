@@ -14,9 +14,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useForm } from "react-hook-form"
-import { login } from "@/apis/apiFunctions/auth"
+import { googleLogin, login } from "@/apis/apiFunctions/auth"
 import { useAppDispatch, useAppSelector } from "@/redux-toolkit/Typed-hooks"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
+import { setToken ,setUser } from "@/redux-toolkit/slices/auth"
+import { toast } from "sonner"
+import { useSession } from 'next-auth/react';
 
 
 export function CardWithForm() {
@@ -28,13 +32,41 @@ export function CardWithForm() {
       } = useForm();
       const dispatch = useAppDispatch();
       const router = useRouter();
+      const [loading , setLoading] = React.useState(false);
 
       const {token}  = useAppSelector(state=> state.auth);
+      const { data: session, status } = useSession();
+
+      const googleSigninApiCall = async()=>{
+        setLoading(true);
+        const res = await googleLogin();
+        console.log(res);
+        dispatch(setToken(res.data.data));
+        dispatch(setUser(res.data.token));
+        setLoading(false);  
+        router.push('/problems/1');
+      }
+
+      React.useEffect(()=>{
+        console.log(status);
+        if (status === 'authenticated'){
+        toast("Logging in");
+        console.log("Calling function");
+         googleSigninApiCall();
+        }
+      } , [status]);
 
     const loginAPI = async(data:any)=>{
         console.log(data);
-
+        setLoading(true);
         await login(data , dispatch , router);
+        setLoading(false);
+    }
+
+    const googleSiginHandler = async()=>{
+      setLoading(true);
+      toast("Signing in");
+      await signIn('google');
     }
 
     if(token){
@@ -42,6 +74,7 @@ export function CardWithForm() {
     }
 
   return (
+    <div className="flex flex-col gap-5">
     <Card className="w-[350px]">
       <CardHeader>
         <CardTitle>Login</CardTitle>
@@ -68,11 +101,19 @@ export function CardWithForm() {
        
         </CardContent>
         <CardFooter className="flex justify-between">
-            <Button variant="link">Forgot Password</Button>
-            <Button type="submit">Login</Button>
+            <Button variant="link" disabled = {loading}>Forgot Password</Button>
+            <Button type="submit" disabled={loading} className={`${loading? "opacity-50": "opacity-100"}`}>Login</Button>
         </CardFooter>
       </form>
 
     </Card>
+
+    <Button onClick={googleSiginHandler} className="flex justify-center gap-3" disabled={loading}>
+              
+    <img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" alt="google" width={20} height={20} />
+
+      Continue With Google
+      </Button>
+    </div>
   )
 }

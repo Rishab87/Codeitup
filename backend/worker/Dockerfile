@@ -21,17 +21,17 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of your application code to the container
-COPY .build/ /usr/src/app/
+COPY ./build /usr/src/app/
 
 # Set environment variables if needed
 # ENV NODE_ENV=production
-ENV REDIS_HOST = "rediss://red-cpen0en109ks73fgg0mg:pTsdgVDBfslqjYBT08pIZ1Wg3OBaK3yz@singapore-redis.render.com:6379"
-ENV REDIS_QUEUE = "rediss://red-cpi6afcf7o1s73bcr1og:SJ4WJDkJGABga82iElBAdCnLEy2BHcFG@singapore-redis.render.com:6379"
+ENV REDIS_HOST=rediss://red-cpen0en109ks73fgg0mg:pTsdgVDBfslqjYBT08pIZ1Wg3OBaK3yz@singapore-redis.render.com:6379
+ENV REDIS_QUEUE=rediss://red-cpi6afcf7o1s73bcr1og:SJ4WJDkJGABga82iElBAdCnLEy2BHcFG@singapore-redis.render.com:6379
 
 # Expose any ports your app needs
-EXPOSE 8080
+# EXPOSE 8080
 
 
 
 # You may also include a command to start your worker process
-CMD ["node", "./build/src/index.js"]
+CMD ["node", "./src/index.js"]

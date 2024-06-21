@@ -1,12 +1,15 @@
+import { getServerSession } from "next-auth";
 import { apiConnector } from "../apiConnector";
 import { authEndpoints } from "../apiEndpoints";
 import { setToken, setUser } from "@/redux-toolkit/slices/auth";
 import { toast } from "sonner"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 //add toast
 export const login = async(data: object , dispatch: any , router: any)=>{
     try{
 
+        toast("Logging in");
         const response = await apiConnector("POST" , authEndpoints.login , data , {} , {});
 
         if(!(response.status == 200)){
@@ -26,7 +29,7 @@ export const login = async(data: object , dispatch: any , router: any)=>{
 
 export const sendotp = async(email:string , router:any)=>{
     try{
-
+        toast("Sending OTP");
         const response = await apiConnector("POST" , authEndpoints.sendOtp , {email} , {}  , {});
 
         if(!response.data.success){
@@ -43,7 +46,7 @@ export const sendotp = async(email:string , router:any)=>{
     }
 }
 
-export const signup = async(data:any , router:any)=>{
+export const signup = async(data:any , router:any , dispatch:any)=>{
     try{
 
         const response = await apiConnector("POST" , authEndpoints.signup , data , {} , {});
@@ -53,6 +56,7 @@ export const signup = async(data:any , router:any)=>{
         }
 
         toast("Singed Up Successfully");
+        dispatch(setUser(null));
         router.push('/login');
 
     } catch(error){
@@ -94,4 +98,28 @@ export const cookieLogin = async(dispatch:any)=>{
             console.log(error);
         }
     
+}
+
+export const googleLogin = async()=>{
+
+    
+    try {
+            const res = await fetch('/api/get-server-session' , {
+                method: "GET"
+            })  
+            const userInfo = await res.json();
+            console.log(userInfo);
+            const response = await apiConnector("POST" , authEndpoints.nextAuth , userInfo.data , {} , {});
+    
+            console.log(response);
+            
+            if (response.data.success) {
+                return response.data;
+            } else {
+                throw new Error(response.data.message);
+            }
+    } catch (error) {
+            console.log(error);
+            toast("Can't login");
+    }
 }

@@ -100,7 +100,7 @@ export const cookieLogin = async(dispatch:any)=>{
     
 }
 
-export const googleLogin = async()=>{
+export const googleLogin = async(dispatch: any)=>{
 
     
     try {
@@ -114,7 +114,8 @@ export const googleLogin = async()=>{
             console.log(response);
             
             if (response.data.success) {
-                return response.data;
+                dispatch(setToken(response.data.token));
+                dispatch(setUser(response.data.data));
             } else {
                 throw new Error(response.data.message);
             }

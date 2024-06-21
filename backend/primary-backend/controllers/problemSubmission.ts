@@ -55,3 +55,26 @@ export const submitProblem = async(req:Request, res: Response)=>{
         return res.status(500).json({error: (error as Error).message})
     }
 }
+
+export const getUserSubmissionsByQuestion = async(req:Request, res: Response)=>{
+    try{
+
+        const {questionId , userId} = req.body;
+        
+        if(!questionId || !userId){
+            return res.status(400).json({message: "Question id and user id is required"});
+        }
+
+        const submissions = await prisma.submissions.findMany({
+            where:{
+                questionId,
+                userId
+            },
+        });
+
+        return res.status(200).json({data: submissions , success:true});
+
+    } catch(error){
+        return res.status(500).json({error: (error as Error).message , success:false});
+    }
+}

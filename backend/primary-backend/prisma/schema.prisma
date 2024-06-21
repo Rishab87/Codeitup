@@ -17,19 +17,19 @@ model User{
   id       String   @id @default(cuid())
   email    String   @unique
   firstName     String
-  token  String @default("") //look if we need this
+  token  String @default("") 
   image String 
   lastName      String
   easy    Int @default(0)
   medium Int @default(0)
-  hard  Int @default(0) //migrate
+  hard  Int @default(0) 
   username String @unique
   createdAt DateTime @default(now())
   skills String[] @default([])
   linkedinUrl String @default("")
   githubUrl String @default("")
   instagramUrl String @default("")
-  youtubeUrl String @default("") //migrate
+  youtubeUrl String @default("") 
   Streak Int @default(0) //on this platform user can mail us with the question idea with its test cases and admin will have a dashboard from where he can add the question and test cases
   password String
   points    Int    @default(0) //user will get points based on the speed of execution and space complexity // eg 10 points if it gets executed in this much time 5 pts if it took this much space
@@ -47,7 +47,7 @@ model Question{
   testCases Json[]
   tags Tag[] @relation("Question Tags")
   examples Json[]
-  constraints String[] //add search on basis of topics and on basis of names of questions
+  constraints String[] 
   createdAt DateTime @default(now())
   Submissions Submissions[]
   //add companies
@@ -61,15 +61,14 @@ model Tag {
 
 model Submissions{
   id       String   @id @default(cuid())
-  // title    String //remove this //migrate
   createdAt DateTime @default(now())
   questionId String
   executedTime Int
   executedSpace Int
   code String
+  // language String
   Question Question @relation(fields: [questionId], references: [id])
   userId String
-  //add code to submision
   User User @relation(fields: [userId], references: [id])
   status SubmissionStatus
 }
@@ -79,5 +78,5 @@ enum SubmissionStatus {
   ACCEPTED
   TIME_LIMIT_EXCEEDED
   RUNTIME_ERROR
-  COMPILE_TIME_ERROR //migrate
+  COMPILE_TIME_ERROR 
 }

@@ -7,7 +7,8 @@ export const questionEndpoints = {
 }
 
 export const submissionEndpoints = {
-    submitCode: `${url}/problem-submission/submit-problem`
+    submitCode: `${url}/problem-submission/submit-problem`,
+    getUserSubmissionsByQuestion: `${url}/problem-submission/get-user-submissions-by-question`,
 }
 
 export const authEndpoints = {

@@ -127,22 +127,30 @@ redisClient.subscribe('submissions' , async(message)=>{
             } , 
 
         });
-
         
-        const updateData = {
-          [difficulty]: {
-            increment: 1,
-          },
-          points: {
-            increment: 1,
-          }
-        };
-        await prisma.user.update({
-          where:{
-            id: userId,
-          },
-          data: updateData,
-        });
+        if(subStatus === SubmissionStatus.ACCEPTED){
+          const updateData = {
+            [difficulty]: {
+              increment: 1, 
+            },
+            points: {
+              increment: 1,
+            }
+          };
+          
+          await prisma.user.update({
+            where:{
+              id: userId,
+              Submissions:{
+                some:{
+                  questionId: questionId,
+                  status: SubmissionStatus.ACCEPTED
+                }
+              }
+            },
+            data: updateData,
+          });
+        }
 
         //inc user points if easy question is easy then 1  , medium 2 , hard 3 
         //update easy hard or med question in user profile

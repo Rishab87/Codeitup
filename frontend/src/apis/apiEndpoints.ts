@@ -25,4 +25,8 @@ export const authEndpoints = {
 
 export const profileEndpoints = {
     checkUsername: `${url}/profile/checkForUsername`,
+    getUserByUsername: `${url}/profile/getUserByUsername`,
+    uploadImage: `${url}/profile/updaetProfileImage`,
+    updateProfile : `${url}/profile/updateProfile`,
+    updateUsername: `${url}/profile/updateUsername`
 }

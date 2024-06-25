@@ -124,3 +124,20 @@ export const googleLogin = async(dispatch: any)=>{
             toast("Can't login");
     }
 }
+
+export const changePassword = async(data: any)=>{
+    try{
+        toast("Changing password");
+        const response = await apiConnector("POST" , authEndpoints.changePassword , data , {} , {});
+
+        if(!response.data.success){
+            throw new Error(response.data.message);
+        }
+
+        toast("Password changed successfully");
+
+    } catch(error){
+        console.log(error);
+        toast((error as Error).message);
+    }
+}

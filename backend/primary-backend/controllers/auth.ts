@@ -201,7 +201,17 @@ export const changePassword = async(req:Request, res: Response)=>{
 
         const changePasswordSchema = z.object({
             password: z.string().min(6),
-            newPassword: z.string().min(6),
+            newPassword: z.string().min(6).refine((password) => {
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasLowerCase = /[a-z]/.test(password);
+                const hasNumber = /[0-9]/.test(password);
+                const hasSynbol = /[^A-Za-z0-9]/.test(password);
+            
+                return hasUpperCase && hasLowerCase && hasNumber && hasSynbol;
+              }, {
+                message: "Password must contain at least one uppercase ,  one lowercase letter , one number and one symbol."
+              }),
+            confirmNewPassword: z.string().min(6),
         });
 
         const zodValidation = changePasswordSchema.safeParse(req.body);
@@ -210,7 +220,7 @@ export const changePassword = async(req:Request, res: Response)=>{
             return res.status(400).json({error: zodValidation.error})
         }
 
-        const {password , newPassword} = req.body;  
+        const {password , newPassword , confirmNewPassword} = req.body;  
 
         const user = await prisma.user.findFirst({
             where:{
@@ -222,8 +232,16 @@ export const changePassword = async(req:Request, res: Response)=>{
             return res.status(400).json({message: "User does not exists"})
         }
 
+        if(newPassword !== confirmNewPassword){
+            return res.status(400).json({message: "Password and confirm password do not match"})
+        }
+
         if(!await bcrypt.compare(password, user.password)){
             return res.status(400).json({message: "Invalid password"})
+        }
+
+        if(await bcrypt.compare(newPassword, user.password)){
+            return res.status(400).json({message: "New password cannot be same as old password"})
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);

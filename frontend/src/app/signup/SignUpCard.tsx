@@ -81,10 +81,8 @@ export function CardWithForm() {
 
     const googleSigninApiCall = async()=>{
       setLoading(true);
-      const res = await googleLogin();
+      const res = await googleLogin(dispatch);
       console.log(res);
-      dispatch(setToken(res.data.data));
-      dispatch(setUser(res.data.token));
       setLoading(false);
       router.push('/problems/1');
     }

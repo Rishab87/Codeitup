@@ -70,6 +70,9 @@ export const getUserSubmissionsByQuestion = async(req:Request, res: Response)=>{
                 questionId,
                 userId
             },
+            orderBy:{
+                createdAt: 'desc'
+            },
         });
 
         return res.status(200).json({data: submissions , success:true});

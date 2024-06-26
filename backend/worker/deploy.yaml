@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+  labels:
+    app: worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image:  rishab87/worker-codeitup
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "500m" 
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1024Mi"
+          env:
+            - name: REDIS_HOST
+              value: rediss://red-cpen0en109ks73fgg0mg:pTsdgVDBfslqjYBT08pIZ1Wg3OBaK3yz@singapore-redis.render.com:6379 
+            - name: REDIS_QUEUE
+              value: rediss://red-cpi6afcf7o1s73bcr1og:SJ4WJDkJGABga82iElBAdCnLEy2BHcFG@singapore-redis.render.com:6379

@@ -28,5 +28,6 @@ export const profileEndpoints = {
     getUserByUsername: `${url}/profile/getUserByUsername`,
     uploadImage: `${url}/profile/updaetProfileImage`,
     updateProfile : `${url}/profile/updateProfile`,
-    updateUsername: `${url}/profile/updateUsername`
+    updateUsername: `${url}/profile/updateUsername`,
+    updateSocials: `${url}/profile/updateSocials`
 }

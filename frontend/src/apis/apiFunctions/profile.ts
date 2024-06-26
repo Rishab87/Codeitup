@@ -58,7 +58,7 @@ export const updateProfilePicture = async (image: any , setNewUser: Function) =>
 export const updateProfile = async (data: any , setNewUser: Function) => {
     try{
         toast("Updating Profile");
-        const response = await apiConnector("POST" , profileEndpoints.updateProfile , data , {} , {});
+        const response = await apiConnector("POST" , profileEndpoints.updateProfile ,  data, {} , {});
 
         if(!response.data.success){
             throw new Error(response.data);
@@ -92,5 +92,23 @@ export const updateUsername = async (username: string , setNewUser:Function ,rou
     } catch(error){
         console.log(error);
         toast("Error Updating Username");
+    }
+}
+
+export const updateSocials = async (socials: any , setNewUser: Function) => {
+    try{
+        toast("Updating Socials");
+        const response = await apiConnector("POST" , profileEndpoints.updateSocials , {socials: socials} , {} , {});
+
+        if(!response.data.success){
+            throw new Error(response.data);
+        }
+        setNewUser(response.data.data);
+        toast("Socials Updated");
+        return response.data.data;
+
+    } catch(error){
+        console.log(error);
+        toast((error as Error)?.response?.data?.message);
     }
 }

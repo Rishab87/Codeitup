@@ -16,6 +16,7 @@ import { passwordSchema } from './PasswordSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { changePassword } from '@/apis/apiFunctions/auth'
+import { useRouter } from 'next/navigation'
 
 
 
@@ -28,6 +29,8 @@ const ChangePassword = () => {
       } = useForm({
         resolver: zodResolver(passwordSchema),
       });
+
+      const router = useRouter();
 
       const changePasswordAPI = async(data:any)=>{
         console.log(data);
@@ -42,7 +45,7 @@ const ChangePassword = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
+          <DialogTitle>Change Password</DialogTitle>
           <DialogDescription>
             Make changes to your password here. Click update when you're done.
           </DialogDescription>
@@ -51,9 +54,9 @@ const ChangePassword = () => {
           <div className="grid w-full items-center gap-4">
           <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="Oldpassword">Old Password:</Label>
-                <Input id="Oldpassword" type="password" placeholder="Enter Password" aria-required {...register("password" , {required:true})}/>
+                <Input id="Oldpassword" type="password" placeholder="Enter Old Password" aria-required {...register("password" , {required:true})}/>
                 {
-                    errors.newPassword && <span className="text-red-500">Old Password is required</span>
+                    errors.password && <span className="text-red-500">Old Password is required</span>
                 }
             </div>
 
@@ -62,7 +65,7 @@ const ChangePassword = () => {
                 <Label htmlFor="password">New Password:</Label>
                 <Input id="password" type="password" placeholder="Enter Password" aria-required {...register("newPassword" , {required:true})}/>
                 {
-                    errors.newPassword && <span className="text-red-500">Password is required</span>
+                    errors.newPassword && <span className="text-red-500">{errors.newPassword.message}</span>
                 }
                 </div>
 
@@ -70,7 +73,7 @@ const ChangePassword = () => {
                 <Label htmlFor="confirmPassword">Confirm New Password:</Label>
                 <Input id="confirmPassword" type="password" placeholder="Confirm Password" aria-required {...register("confirmNewPassword" , {required:true})}/>
                 {
-                    errors.confirmNewPassword && <span className="text-red-500">Confirm Password is required</span>
+                    errors.confirmNewPassword && <span className="text-red-500">{errors.confirmNewPassword.message}</span>
                 }
                 </div>
             </div>
@@ -88,6 +91,7 @@ const ChangePassword = () => {
 
        
             <DialogFooter className="mt-2">
+                <Button variant={'link'} onClick={()=>router.push('/forgot-password')}>Forgot Password?</Button>
                 <Button type="submit">Update Password</Button>
             </DialogFooter>
         </form>

@@ -17,6 +17,7 @@ import { updateProfile} from "@/apis/apiFunctions/profile"
 import SkillsInput from "./SkillsInput"
 import { toast } from "sonner"
 import { TbEdit } from "react-icons/tb";
+import { Textarea } from "@/components/ui/textarea"
 
 export function EditProfileDialog({setNewUser}:{setNewUser:Function}) {
 
@@ -28,6 +29,7 @@ export function EditProfileDialog({setNewUser}:{setNewUser:Function}) {
     const {
         register,
         handleSubmit,
+        getValues,
         formState: { errors },
       } = useForm();
 
@@ -35,14 +37,19 @@ export function EditProfileDialog({setNewUser}:{setNewUser:Function}) {
 
     const updateProfileAPI = async(data:any)=>{
 
-        if(skills == user?.skills && data.firstName == user?.firstName && data.lastName == user?.lastName){
+        if(skills == user?.skills && data.firstName == user?.firstName && data.lastName == user?.lastName && data.bio == user?.bio){
             toast("No changes made");
             return;
         }
+        
+        if(data.bio.length>100){
+            toast("Bio must be of 100 letters or less");
+            return;
+        }
 
-        const {firstName , lastName} = data;
+        const {firstName , lastName , bio} = data;
         console.log(data);
-        await updateProfile({firstName , lastName , skills} , setNewUser);
+        await updateProfile({firstName , lastName , skills ,bio} , setNewUser);
     }
 
   return (
@@ -75,6 +82,14 @@ export function EditProfileDialog({setNewUser}:{setNewUser:Function}) {
                     errors.lastName && <span className="text-red-500">Last Name is required</span>
                 }
                 </div>
+            </div>
+
+            <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea id="bio" defaultValue={user?.bio} placeholder="Enter your bio" aria-required {...register("bio")} maxLength={100}/>
+                {
+                    errors.bio && <span className="text-red-500">Bio is required</span>
+                }
             </div>
 
 

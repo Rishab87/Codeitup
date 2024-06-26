@@ -26,10 +26,8 @@ model User{
   username String @unique
   createdAt DateTime @default(now())
   skills String[] @default([])
-  linkedinUrl String @default("")
-  githubUrl String @default("")
-  instagramUrl String @default("")
-  youtubeUrl String @default("") 
+  socials Json @default("{ \"linkedinUrl\": \"\", \"githubUrl\": \"\", \"instagramUrl\": \"\", \"youtubeUrl\": \"\"}")  
+  bio String @default("")
   Streak Int @default(0) //on this platform user can mail us with the question idea with its test cases and admin will have a dashboard from where he can add the question and test cases
   password String
   points    Int    @default(0) //user will get points based on the speed of execution and space complexity // eg 10 points if it gets executed in this much time 5 pts if it took this much space

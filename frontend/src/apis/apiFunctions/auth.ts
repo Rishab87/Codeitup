@@ -138,6 +138,23 @@ export const changePassword = async(data: any)=>{
 
     } catch(error){
         console.log(error);
-        toast((error as Error).message);
+        toast((error as Error)?.response?.data?.message);
+    }
+}
+
+export const forgotPasswordToken = async(email: string)=>{
+    try{
+        toast("Sending email");
+        const response = await apiConnector("POST" , authEndpoints.forgotPasswordToken , {email} , {} , {});
+
+        if(!response.data.success){
+            throw new Error(response.data.message);
+        }
+
+        toast("Email sent");
+
+    } catch(error){
+        console.log(error);
+        toast((error as Error)?.response?.data?.message);
     }
 }

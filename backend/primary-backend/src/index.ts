@@ -142,9 +142,12 @@ redisClient.subscribe('submissions' , async(message)=>{
             where:{
               id: userId,
               Submissions:{
-                some:{
+                every:{
                   questionId: questionId,
-                  status: SubmissionStatus.ACCEPTED
+                  userId: userId,
+                  NOT:{
+                    status: SubmissionStatus.ACCEPTED
+                  }
                 }
               }
             },

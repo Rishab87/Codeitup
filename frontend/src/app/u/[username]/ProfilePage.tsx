@@ -31,14 +31,20 @@ const ProfilePage = ({username}:{username:string}) => {
 
   return (
     <div className='flex gap-10'>
-        <div className='flex flex-col gap-5'>
+        <div className='flex flex-col gap-5 w-[30%]'>
             <ImageEdit newUser={newUser} setNewUser={setNewUser}/>
-            <div className='font-mono mx-auto   '>
-                <p className='text-xl'>{newUser?.firstName} {newUser?.lastName}</p>
-                <p className='text-sm'>Joined on: {formatTimestamp(user?.createdAt)}</p>
+            <div className='font-mono ml-10 flex flex-col gap-2'>
+                <div>
+                    <p className='text-xl'>{newUser?.firstName} {newUser?.lastName}</p>
+                    <p className='text-sm'>Joined on: {formatTimestamp(newUser?.createdAt)}</p>
+                </div>
+                <div>
+                    <p className='text-lg'>{newUser?.bio}</p>
+                    <Separator/>
+                </div>
             </div>
             
-            <Socials newUser={newUser}/>
+            <Socials newUser={newUser} setNewUser={setNewUser}/>
         </div>
 
         <div className='flex flex-col gap-10 w-[60%]'>

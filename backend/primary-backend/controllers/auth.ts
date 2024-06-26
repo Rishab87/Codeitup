@@ -237,7 +237,7 @@ export const changePassword = async(req:Request, res: Response)=>{
         }
 
         if(!await bcrypt.compare(password, user.password)){
-            return res.status(400).json({message: "Invalid password"})
+            return res.status(400).json({message: "Old password is incorrect"})
         }
 
         if(await bcrypt.compare(newPassword, user.password)){
@@ -272,7 +272,7 @@ export const forgotPasswordToken = async(req:Request, res: Response)=>{
         const zodValidation = forgotPasswordTokenSchema.safeParse(req.body);
 
         if(!zodValidation.success){
-            return res.status(400).json({error: zodValidation.error})
+            return res.status(400).json({error: zodValidation.error ,  success:false})
         }
 
         const {email} = req.body;
@@ -288,11 +288,11 @@ export const forgotPasswordToken = async(req:Request, res: Response)=>{
         }
 
         const token = jwt.sign({email}, process.env.JWT_SECRET as string, {expiresIn: "5m"});
-        await mailSender(email, "Forgot Password", `Click on the link to reset password http://localhost:3000/reset-password/${token}`);
-        return res.status(201).json({message: "Link sent successfully"});
+        await mailSender(email, "Forgot Password", `Click on the link to reset password http://localhost:3000/forgot-password/${token}`);
+        return res.status(201).json({message: "Link sent successfully" , success:true});
         
     } catch(error){
-        return res.status(500).json({error: (error as Error).message})
+        return res.status(500).json({error: (error as Error).message , success:false})
     }
 }
 
@@ -301,23 +301,37 @@ export const forgotPassword = async(req:Request, res: Response)=>{
 
         const forgotPasswordSchema = z.object({
             email: z.string().email(),
-            newPassword: z.string().min(6),
-            token: z.string().length(6)
+            newPassword: z.string().min(6).refine((password) => {
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasLowerCase = /[a-z]/.test(password);
+                const hasNumber = /[0-9]/.test(password);
+                const hasSynbol = /[^A-Za-z0-9]/.test(password);
+            
+                return hasUpperCase && hasLowerCase && hasNumber && hasSynbol;
+              }, {
+                message: "Password must contain at least one uppercase ,  one lowercase letter , one number and one symbol."
+              }),
+            token: z.string().length(6),
+            confirmNewPassword: z.string().min(6),
         });
 
         const zodValidation = forgotPasswordSchema.safeParse(req.body);
 
         if(!zodValidation.success){
-            return res.status(400).json({error: zodValidation.error})
+            return res.status(400).json({error: zodValidation.error, success:false})
         }
 
-        const {email , newPassword , token} = req.body;
+        const {email , newPassword , confirmNewPassword , token} = req.body;
         
         try{
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
         }
         catch(error){
-            return res.status(400).json({message: "token expired"});
+            return res.status(400).json({message: "token expired" , success:false});
+        }
+
+        if(newPassword !== confirmNewPassword){
+            return res.status(400).json({message: "Password and confirm password do not match" , success:false});
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -331,10 +345,10 @@ export const forgotPassword = async(req:Request, res: Response)=>{
             }
         });
 
-        return res.status(201).json({message: "Password changed successfully"});
+        return res.status(201).json({message: "Password changed successfully" , success:true});
 
     } catch(error){
-        return res.status(500).json({error: (error as Error).message})
+        return res.status(500).json({error: (error as Error).message , success:false})
     }
 }
 

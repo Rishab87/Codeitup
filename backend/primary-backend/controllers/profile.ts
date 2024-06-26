@@ -89,6 +89,7 @@ export const updateProfileDetails = async(req:RequestWithUserId , res:Response)=
             firstName: z.string().optional(),
             lastName: z.string().optional(),
             skills: z.array(z.string()).optional(),
+            bio: z.string().optional(),
         });
 
         const zodValidation = zodSchema.safeParse(req.body);
@@ -97,7 +98,7 @@ export const updateProfileDetails = async(req:RequestWithUserId , res:Response)=
             return res.status(400).json({error: zodValidation.error , success:false,})
         }
 
-        const {firstName= user?.firstName , lastName= user?.lastName , skills= user?.skills} = req.body;
+        const {firstName= user?.firstName , lastName= user?.lastName , skills= user?.skills , bio= user?.bio} = req.body;
 
         const updatedUser = await prisma.user.update({
             where:{
@@ -107,6 +108,7 @@ export const updateProfileDetails = async(req:RequestWithUserId , res:Response)=
                 firstName,
                 lastName,
                 skills,
+                bio,
             }
         });
 
@@ -128,17 +130,44 @@ export const updateSocials = async(req:RequestWithUserId , res:Response)=>{
             }
         });
 
-        const {instagramUrl = user?.instagramUrl , linkedinUrl = user?.linkedinUrl , youtubeUrl = user?.youtubeUrl , githubUrl = user?.githubUrl} = req.body;
+        const socialsSchema = z.object({
+            youtube: z
+              .string()
+              .regex(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?[\w-]+$/, { message: 'Invalid YouTube URL' })
+              .optional(),
+            github: z
+              .string()
+              .regex(/^(https?:\/\/)?(www\.)?github\.com\/[\w-]+\/?$/, { message: 'Invalid GitHub URL' })
+              .optional(),
+            linkedin: z
+              .string()
+              .regex(/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+\/?$/, { message: 'Invalid LinkedIn URL' })
+              .optional(),
+            portfolio: z
+              .string()
+              .regex(/^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-]*)*$/, { message: 'Invalid Portfolio URL' })
+              .optional(),
+            
+          });
+
+        const socialsValidation = socialsSchema.safeParse(req.body);
+
+        if(!socialsValidation.success){
+            return res.status(400).json({error: socialsValidation.error , success:false,})
+        }
+        
+
+        const {socials = user?.socials} = req.body;
+        console.log(socials);
+        
+        
 
         const updatedUser = await prisma.user.update({
             where:{
                 id: userId,
             },
             data:{
-                instagramUrl,
-                linkedinUrl,
-                youtubeUrl,
-                githubUrl,
+                socials,
             }
         });
 

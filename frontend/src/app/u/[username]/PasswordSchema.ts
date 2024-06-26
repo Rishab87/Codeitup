@@ -12,4 +12,5 @@ export const passwordSchema = z.object({
         message: "Password must contain at least one uppercase ,  one lowercase letter , one number and one symbol."
       }),
     confirmNewPassword: z.string().min(6),
+    password: z.string().min(6),
 })

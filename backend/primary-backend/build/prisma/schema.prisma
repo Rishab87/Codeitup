@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id       String   @id @default(cuid())
+  email    String   @unique
+  firstName     String
+  token  String @default("") 
+  image String 
+  lastName      String
+  easy    Int @default(0)
+  medium Int @default(0)
+  hard  Int @default(0) 
+  username String @unique
+  createdAt DateTime @default(now())
+  skills String[] @default([])
+  socials Json @default("{ \"linkedinUrl\": \"\", \"githubUrl\": \"\", \"instagramUrl\": \"\", \"youtubeUrl\": \"\"}")  
+  bio String @default("")
+  Streak Int @default(0) //on this platform user can mail us with the question idea with its test cases and admin will have a dashboard from where he can add the question and test cases
+  password String
+  points    Int    @default(0) //user will get points based on the speed of execution and space complexity // eg 10 points if it gets executed in this much time 5 pts if it took this much space
+  Submissions Submissions[] //user can arrange the questions and create a structured roadmap for themselves
+}
+
+model Question{
+  id       String   @id @default(cuid())
+  title    String
+  description String
+  config Json //config main jo question hoga uss hisab se input bne honge aur woh input pass h honge function main call ho rha hoga aur woh UI pe nhi dikhaonga code main add krke bhej dunga 
+  difficulty String
+  minTime Int
+  // minSpace Int
+  testCases Json[]
+  tags Tag[] @relation("Question Tags")
+  examples Json[]
+  constraints String[] 
+  createdAt DateTime @default(now())
+  Submissions Submissions[]
+  //add companies
+}
+
+model Tag {
+  id        String      @id @default(cuid())
+  question Question[] @relation("Question Tags") 
+  name      String  @unique
+}
+
+model Submissions{
+  id       String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  questionId String
+  executedTime Decimal
+  executedSpace Decimal
+  code String
+  // language String
+  Question Question @relation(fields: [questionId], references: [id])
+  userId String
+  User User @relation(fields: [userId], references: [id])
+  status SubmissionStatus
+}
+
+enum SubmissionStatus {
+  WRONG_ANSWER
+  ACCEPTED
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILE_TIME_ERROR 
+}

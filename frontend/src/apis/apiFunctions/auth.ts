@@ -19,7 +19,7 @@ export const login = async(data: object , dispatch: any , router: any)=>{
         dispatch(setToken(response.data.token));
         dispatch(setUser(response.data.data));
 
-        router.back();
+        router.push('/problems/1');
 
     } catch(error){
         console.log(error);

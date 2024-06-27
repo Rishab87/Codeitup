@@ -109,25 +109,7 @@ redisClient.subscribe('submissions' , async(message)=>{
         const roundedMemory = parseFloat(memory.toFixed(2));
         const roundedTime = parseFloat(memory.toFixed(2));
 
-        await prisma.submissions.create({
-            data:{
-                status: subStatus,
-                executedSpace: roundedMemory,
-                executedTime: roundedTime,
-                code: userCode,
-                Question: {
-                    connect: {
-                        id: questionId
-                    }
-                },
-                User: {
-                    connect: {
-                        id: userId
-                    }
-                }
-            } , 
 
-        });
         
         if(subStatus === SubmissionStatus.ACCEPTED){
           const updateData = {
@@ -139,26 +121,43 @@ redisClient.subscribe('submissions' , async(message)=>{
             }
           };
           
-          try{
-          await prisma.user.update({
-            where:{
-              id: userId,
-              Submissions:{
-                none:{
-                  questionId: questionId,
-                  userId: userId,
-                  NOT:{
-                    status: SubmissionStatus.ACCEPTED
-                  }
-                }
-              }
-            },
-            data: updateData,
+          const existingAcceptedSubmissions = await prisma.submissions.findMany({
+            where: {
+              questionId: questionId,
+              userId: userId,
+              status: SubmissionStatus.ACCEPTED,
+            }
           });
-        }catch(e){
 
+          if (existingAcceptedSubmissions.length === 0) {
+            const updatedUser = await prisma.user.update({
+              where: {
+                id: userId,
+              },
+              data: updateData,
+            });
         }
       }
+
+      await prisma.submissions.create({
+        data:{
+            status: subStatus,
+            executedSpace: roundedMemory,
+            executedTime: roundedTime,
+            code: userCode,
+            Question: {
+                connect: {
+                    id: questionId
+                }
+            },
+            User: {
+                connect: {
+                    id: userId
+                }
+            }
+        } , 
+
+    });
 
         //inc user points if easy question is easy then 1  , medium 2 , hard 3 
         //update easy hard or med question in user profile
@@ -166,13 +165,12 @@ redisClient.subscribe('submissions' , async(message)=>{
         //update streak when submitting the question check difference between last submitted and current Time if more than 24 hrs streak++;
 
         const ws = clients.get(userId);
-        
         if(ws){
           console.log("SENDIN RES");
           ws.send(JSON.stringify({status , result , time: roundedTime  , memory: roundedMemory}));
         }
-    }
-);
+    
+});
 
 //add editorial and comments feature
 const startServer = async()=>{

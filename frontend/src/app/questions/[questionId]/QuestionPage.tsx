@@ -23,7 +23,7 @@ const QuestionPage = ({question}:{question:any}) => {
 
             <div>
                 <p className='font-bold text-2xl'>{question.title}</p>
-                <p className={`${question.difficulty === "easy"? "text-green-500 bg-green-200":question.difficulty === "medium"? "text-yellow-500 bg-yellow-200": "text-red-500 bg-red-200"} font-semibold text-lg w-[70px] rounded-lg p-1 text-center mt-1 h-[35px]`}>{question.difficulty}</p>
+                <p className={`${question.difficulty === "easy"? "text-green-500 bg-green-200":question.difficulty === "medium"? "text-yellow-500 bg-yellow-200": "text-red-500 bg-red-200"} font-semibold text-lg w-[80px] rounded-lg p-1 text-center mt-1 h-[35px]`}>{question.difficulty}</p>
             </div>
 
             <div>

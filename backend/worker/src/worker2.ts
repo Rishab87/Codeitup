@@ -128,7 +128,7 @@ const getConfig = (language: string, code: string, input: string) => {
             return {
                 fileName: 'script.py',
                 compileCmd: `echo "${codeEscaped}" > script.py`,
-                runCmd: `echo "${inputEscaped}" | python script.py`
+                runCmd: `echo "${inputEscaped}" | python3 script.py`
             };
         case 'javascript':
             return {

@@ -111,12 +111,12 @@ export function CardWithForm() {
 
     </Card>
 
-    <Button onClick={googleSiginHandler} className="flex justify-center gap-3" disabled={loading}>
+    {/* <Button onClick={googleSiginHandler} className="flex justify-center gap-3" disabled={loading}>
               
     <img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" alt="google" width={20} height={20} />
 
       Continue With Google
-      </Button>
+      </Button> */}
     </div>
   )
 }

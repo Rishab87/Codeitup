@@ -62,9 +62,11 @@ const SubmissionsPage = ({submissions}:{submissions:any}) => {
                     <DialogHeader>
                         <DialogTitle>Code</DialogTitle>
                     </DialogHeader>
-                    <DialogDescription>
+                    <div className='overflow-scroll'>
+                    <DialogDescription className='max-h-[90vh] max-w-[500px]'>
                         <pre className='font-mono'>{submision.code}</pre>
                     </DialogDescription>
+                    </div>
                 </DialogContent>
             </Dialog>
             </TableRow>

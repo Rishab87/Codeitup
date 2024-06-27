@@ -25,8 +25,6 @@ const OutputBox = ({examples , message , loading}:{examples:any , message:any , 
         <Skeleton className='h-[80%] w-full p-2'/>
     )
    }  
-
-   console.log(message);
    
 
   return (

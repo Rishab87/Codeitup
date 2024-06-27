@@ -23,7 +23,6 @@ const ProfilePage = ({username}:{username:string}) => {
     const fetchUser = async()=>{
         const res = await getUserByUsername(username);
         setNewUser(res);
-        console.log(res);
     }
   
     useEffect(()=>{

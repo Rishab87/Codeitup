@@ -68,10 +68,8 @@ export function CardWithForm() {
             toast("Passwords do not match");
             return;
         }
-        console.log(data);
         setLoading(true);
         
-        console.log(data);
         dispatch(setUser(data));
         await sendotp(data.email , router);
         setLoading(false);
@@ -82,7 +80,6 @@ export function CardWithForm() {
     const googleSigninApiCall = async()=>{
       setLoading(true);
       const res = await googleLogin(dispatch);
-      console.log(res);
       signOut({callbackUrl: '/problems/1'});
       setLoading(false);
     }
@@ -169,7 +166,7 @@ export function CardWithForm() {
                 {
                     !loading && usernameStatus == -1 && (
                         <div className="text-red-500 w-full mt-3">
-                            can't fetch usernames
+                            can&apos;t fetch usernames
                         </div>
                     )
                 }
@@ -193,14 +190,14 @@ export function CardWithForm() {
                     <Label htmlFor="password">Password</Label>
                     <Input id="password" type="password" placeholder="Enter your password" aria-required {...register("password" , {required:true})}/>
                     {
-                        errors.password && <span className="text-red-500">{errors?.password?.message}</span>
+                        errors.password && <span className="text-red-500">{(errors as any)?.password?.message}</span>
                     }
                 </div>
                 <div className="flex flex-col space-y-1.5">
                     <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <Input id="confirmPassword" type="password" placeholder="Confirm password" aria-required {...register("confirmPassword" , {required:true})}/>
                     {
-                        errors.confirmPassword && <span className="text-red-500">{errors?.confirmPassword?.message}</span>
+                        errors.confirmPassword && <span className="text-red-500">{(errors as any)?.confirmPassword?.message}</span>
                     }
                 </div>
               </div>

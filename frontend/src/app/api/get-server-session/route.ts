@@ -1,11 +1,10 @@
 // pages/api/another-route.ts
 
-import { NextApiRequest} from 'next';
+import { authOptions } from '@/utils/authOptions';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextApiRequest){
+export async function GET(req: NextRequest){
     const session = await getServerSession(authOptions);
     let userInfo = {};
 

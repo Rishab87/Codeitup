@@ -12,6 +12,8 @@ import problemSubmissionRoutes from '../routes/problemSubmission';
 import questionRoutes from '../routes/questions';
 import { SubmissionStatus } from '@prisma/client';
 import { cloudinaryConnect } from '../config/cloudinary';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 dotenv.config();
@@ -40,10 +42,15 @@ app.options('*', cors({
 
 const wss = new WebSocket.Server({ port: 8080 });
 
+const tempDir = path.join(__dirname , '/temp');
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir, { recursive: true });
+}
+
 app.use(express.json());
 app.use(fileUploader({
   useTempFiles: true, 
-  tempFileDir: '/tmp/',
+  tempFileDir: tempDir,
 }));
 app.use(cookieParser());  
 cloudinaryConnect();
@@ -58,7 +65,6 @@ const PORT = process.env.PORT || 5000;
 let clients = new Map();
 
 wss.on('connection', function connection(ws , req) {
-    console.log("CONNECTED TO WEBSOCKET");
 
     
     ws.on('message', function incoming(message) {
@@ -74,7 +80,6 @@ wss.on('connection', function connection(ws , req) {
     //send result of problem to frontend
 
     ws.on('close', () => {
-        console.log("CONNECTION CLOSED");
     });
     
 });
@@ -89,7 +94,6 @@ redisClient.subscribe('submissions' , async(message)=>{
         //test cases will contain many objects with input and output key
         ////{input: , output:}
         //minTim se zyada lga toh TLE , minTIME bhejo worker ko
-        console.log("RESULT RECIEVED");
         
         //check all test cases in worker and then update status
         //result is output which I will use in case of error or wrong answer and status is the final status of submission
@@ -166,7 +170,6 @@ redisClient.subscribe('submissions' , async(message)=>{
 
         const ws = clients.get(userId);
         if(ws){
-          console.log("SENDIN RES");
           ws.send(JSON.stringify({status , result , time: roundedTime  , memory: roundedMemory}));
         }
     

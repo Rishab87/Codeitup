@@ -39,7 +39,6 @@ const ChangePassword = () => {
 
       const changePasswordAPI = async(data:any)=>{
         setLoading(true);
-        console.log(data);
         await changePassword(data);
         setLoading(false);
     }
@@ -58,7 +57,7 @@ const ChangePassword = () => {
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
           <DialogDescription>
-            Make changes to your password here. Click update when you're done.
+            Make changes to your password here. Click update when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(changePasswordAPI)}>
@@ -76,7 +75,7 @@ const ChangePassword = () => {
                 <Label htmlFor="password">New Password:</Label>
                 <Input id="password" type="password" placeholder="Enter Password" aria-required {...register("newPassword" , {required:true})}/>
                 {
-                    errors.newPassword && <span className="text-red-500">{errors.newPassword.message}</span>
+                    errors.newPassword && <span className="text-red-500">{(errors as any).newPassword.message}</span>
                 }
                 </div>
 
@@ -84,7 +83,7 @@ const ChangePassword = () => {
                 <Label htmlFor="confirmPassword">Confirm New Password:</Label>
                 <Input id="confirmPassword" type="password" placeholder="Confirm Password" aria-required {...register("confirmNewPassword" , {required:true})}/>
                 {
-                    errors.confirmNewPassword && <span className="text-red-500">{errors.confirmNewPassword.message}</span>
+                    errors.confirmNewPassword && <span className="text-red-500">{(errors as any).confirmNewPassword.message}</span>
                 }
                 </div>
             </div>

@@ -19,10 +19,7 @@ export const getQuestionsByPage = async(req:Request, res: Response)=>{
             orderBy:{
                 createdAt: 'asc',
             }
-        });
-
-        console.log(questions);
-        
+        });        
 
         if(!questions) return res.status(404).json({message: "No questions found"});
 
@@ -70,7 +67,6 @@ export const getQuestionsByTagDifficultyAndSearch= async(req:Request , res: Resp
         return res.status(200).json({success: true , data: questions});
 
     } catch(error){
-        console.log(error);
         return res.status(500).json({error: (error as Error).message , success: false})   
     }
 }

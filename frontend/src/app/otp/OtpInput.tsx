@@ -19,6 +19,16 @@ export function InputOTPControlled() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
+  React.useEffect(() => {
+    if (!user) {
+      router.push("/signup");
+    }
+    if(token){
+      router.push("/problems/1");
+    }
+
+  }, [user, token, router]);
+
   const signupAPI = async(e:any)=>{
     e.preventDefault();
     const {email , password , confirmPassword , username , firstName , lastName} = user;
@@ -28,14 +38,6 @@ export function InputOTPControlled() {
   const sendotpAPI = async(e:any)=>{
     e.preventDefault();
     await sendotp(user.email , router);
-  }
-
-  if(!user){
-    router.back();
-  }
-
-  if(token){
-    router.back();
   }
 
   return (

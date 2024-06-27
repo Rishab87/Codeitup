@@ -62,7 +62,7 @@ const ChangePasswordCard = ({token}:{token:string}) => {
               <Label htmlFor="newPass">New Password</Label>
               <Input id="newPass" type="password" placeholder="Enter your new password" aria-required required {...register("newPassword" , {required:true})}/>
               {
-                errors.newPassword && <span className="text-red-500">{errors.confirmPassword?.message}</span>
+                errors.newPassword && <span className="text-red-500">{(errors as any).confirmPassword?.message}</span>
               }
             </div>
 
@@ -70,7 +70,7 @@ const ChangePasswordCard = ({token}:{token:string}) => {
               <Label htmlFor="confirmNewPassword">Confirm Password</Label>
               <Input id="confirmNewPassword" type="password" placeholder="Confirm password" aria-required required {...register("confirmNewPassword" , {required:true})}/>
               {
-                errors.confirmNewPassword && <span className="text-red-500">{errors.confirmNewPassword.messaage}</span>
+                errors.confirmNewPassword && <span className="text-red-500">{(errors as any).confirmNewPassword.messaage}</span>
               }
             </div>
             </div>

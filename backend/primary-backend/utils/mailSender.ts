@@ -20,10 +20,8 @@ export const mailSender= async(email:string , title:string , body:string)=>{
             subject: `${title}`,
             html: `${body}`,
         });
-        console.log(info);
         return info;
         
     } catch(error){
-        console.error(error);
     }
 }

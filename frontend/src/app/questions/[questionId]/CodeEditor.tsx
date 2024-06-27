@@ -41,17 +41,13 @@ const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{c
         socket.onopen = () => {
         setSocket(socket);
         socket.send(JSON.stringify({userId: user.id , close: false}));
-        console.log("Connected to server");
         }
         
       
-        console.log(code + config[language].executionCode);
-
 
         await submitProblem(code + '\n' + config[language].executionCode , language , questionId , code!);
 
         socket.onmessage = (message)=>{
-            console.log("Message from server: " + message.data);
             setMessage(JSON.parse(message.data));
             setLoading(false);
             socket.send(JSON.stringify({userId: user.id , close: true}));

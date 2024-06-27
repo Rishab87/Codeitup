@@ -40,22 +40,18 @@ export function CardWithForm() {
       const googleSigninApiCall = async()=>{
         setLoading(true);
         const res = await googleLogin(dispatch);
-        console.log(res);
         setLoading(false);  
       }
 
       React.useEffect(()=>{
-        console.log(status);
         if (status === 'authenticated'){
         toast("Logging in");
-        console.log("Calling function");
         signOut({callbackUrl: '/problems/1'});
          googleSigninApiCall();
         }
       } , [status]);
 
     const loginAPI = async(data:any)=>{
-        console.log(data);
         setLoading(true);
         await login(data , dispatch , router);
         setLoading(false);

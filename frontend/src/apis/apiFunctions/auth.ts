@@ -3,7 +3,7 @@ import { apiConnector } from "../apiConnector";
 import { authEndpoints } from "../apiEndpoints";
 import { setToken, setUser } from "@/redux-toolkit/slices/auth";
 import { toast } from "sonner"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/utils/authOptions";
 
 //add toast
 export const login = async(data: object , dispatch: any , router: any)=>{
@@ -22,8 +22,10 @@ export const login = async(data: object , dispatch: any , router: any)=>{
         router.push('/problems/1');
 
     } catch(error){
-        console.log(error);
-        toast((error as Error).message);
+        if((error as any)?.response?.data?.message)
+            toast((error as any)?.response?.data?.message);
+        else
+            toast("Internal server error");
     }
 }
 
@@ -40,7 +42,6 @@ export const sendotp = async(email:string , router:any)=>{
         router.push('/otp');
 
     } catch(error){
-        console.log(error);
         toast("Can't send OTP");
         
     }
@@ -60,8 +61,10 @@ export const signup = async(data:any , router:any , dispatch:any)=>{
         router.push('/login');
 
     } catch(error){
-        console.log(error);
-        toast((error as Error).message);
+        if((error as any)?.response?.data?.message)
+            toast((error as any)?.response?.data?.message);
+        else
+            toast("Internal server error");
     }
 }
 
@@ -77,7 +80,6 @@ export const removeCookie = async()=>{
         toast("Logged out successfully");
 
     } catch(error){
-        console.log(error);
     }
 }
 
@@ -95,7 +97,6 @@ export const cookieLogin = async(dispatch:any)=>{
             dispatch(setToken(response.data.data.token));    
 
         } catch(error){
-            console.log(error);
         }
     
 }
@@ -120,7 +121,6 @@ export const googleLogin = async(dispatch: any)=>{
                 throw new Error(response.data.message);
             }
     } catch (error) {
-            console.log(error);
             toast("Can't login");
     }
 }
@@ -137,8 +137,10 @@ export const changePassword = async(data: any)=>{
         toast("Password changed successfully");
 
     } catch(error){
-        console.log(error);
-        toast((error as Error)?.response?.data?.message);
+        if((error as any)?.response?.data?.message)
+            toast((error as any)?.response?.data?.message);
+        else
+            toast("Internal server error");
     }
 }
 
@@ -154,8 +156,10 @@ export const forgotPasswordToken = async(email: string)=>{
         toast("Email sent");
 
     } catch(error){
-        console.log(error);
-        toast((error as Error)?.response?.data?.message);
+        if((error as any)?.response?.data?.message)
+            toast((error as any)?.response?.data?.message);
+        else
+            toast("Internal server error");
     }
 }
 
@@ -175,9 +179,8 @@ export const forgotPassword = async(data: any , dispatch:any , router: any)=>{
         router.push('/login');
 
     } catch(error){
-        console.log(error);
-        if((error as Error)?.response?.data?.message)
-            toast((error as Error)?.response?.data?.message);
+        if((error as any)?.response?.data?.message)
+            toast((error as any)?.response?.data?.message);
         else
             toast("Internal server error");
     }

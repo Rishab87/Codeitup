@@ -88,7 +88,6 @@ export const signup = async(req:Request, res: Response)=>{
         }
 
         const {email, password , firstName , lastName , username , confirmPassword , otp} = req.body;
-        console.log(req.body);
         
 
         const user  = await prisma.user.findFirst({
@@ -115,9 +114,7 @@ export const signup = async(req:Request, res: Response)=>{
             return res.status(400).json({error: "Email already exists" , success:false})
         }
 
-        const otpFromRedis = await redisQueueClient.get(email);
-        console.log(otpFromRedis , otp);
-        
+        const otpFromRedis = await redisQueueClient.get(email);        
 
         if(otpFromRedis !== otp){
             return res.status(400).json({message: "Invalid OTP" , success:false})
@@ -141,7 +138,6 @@ export const signup = async(req:Request, res: Response)=>{
         return res.status(201).json({message: "User created successfully", data: newUser , success:true});
 
     } catch(error){
-        console.log(error);
         return res.status(500).json({error: (error as Error).message , success:false})
     }
 }

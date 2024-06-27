@@ -12,12 +12,10 @@ export const usernameAvailable = async (username: string) => {
         if(response.status === 500){
             throw new Error(response.data);
         }
-        console.log(response);
-        
+
         return response.data.success;
 
     } catch(error){
-        console.log(error);
         return -1;
     }
 }
@@ -34,7 +32,6 @@ export const getUserByUsername = async (username: string) => {
         return response.data.data;
 
     } catch(error){
-        console.log(error);
     }
 }
 
@@ -52,7 +49,6 @@ export const updateProfilePicture = async (image: any , setNewUser: Function) =>
         return response.data.data;
 
     } catch(error){
-        console.log(error);
         toast("Error Uploading Image");
     }
 }
@@ -73,7 +69,6 @@ export const updateProfile = async (data: any , setNewUser: Function) => {
 
 
     } catch(error){
-        console.log(error);
         toast("Error Updating Profile");
     }
 }
@@ -92,7 +87,6 @@ export const updateUsername = async (username: string , setNewUser:Function ,rou
         return response.data.data;
 
     } catch(error){
-        console.log(error);
         toast("Error Updating Username");
     }
 }
@@ -110,8 +104,7 @@ export const updateSocials = async (socials: any , setNewUser: Function) => {
         return response.data.data;
 
     } catch(error){
-        console.log(error);
-        toast((error as Error)?.response?.data?.message);
+        toast((error as any)?.response?.data?.message);
     }
 }
 
@@ -130,7 +123,6 @@ export const deleteProfile = async (router:any , dispatch:any) => {
         router.push('/');
 
     } catch(error){
-        console.log(error);
         toast("Error Deleting Profile");
     }
 }

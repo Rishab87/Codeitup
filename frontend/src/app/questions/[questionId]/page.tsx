@@ -15,12 +15,9 @@ import {
     TabsList,
     TabsTrigger,
   } from "@/components/ui/tabs"
-import { Separator } from '@/components/ui/separator';
 import CodeEditor from './CodeEditor';
 import OutputBox from './OutputBox';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { getSubmissionsForQuestion } from '@/apis/apiFunctions/submitCode';
-import { Skeleton } from '@/components/ui/skeleton';
 import SubmissionsPage from './SubmissionsPage';
 
 const Page = ({params}:{params:{questionId:string}}) => {
@@ -37,7 +34,6 @@ const Page = ({params}:{params:{questionId:string}}) => {
     useEffect(()=>{
 
         const fetchQuestion = async()=>{
-            console.log(questionId);
             const question = await getQuestionsById(questionId);
             setQuestion(question);
         }

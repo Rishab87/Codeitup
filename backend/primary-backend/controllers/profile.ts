@@ -158,7 +158,6 @@ export const updateSocials = async(req:RequestWithUserId , res:Response)=>{
         
 
         const {socials = user?.socials} = req.body;
-        console.log(socials);
         
         
 

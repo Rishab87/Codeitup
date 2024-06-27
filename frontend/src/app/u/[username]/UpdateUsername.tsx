@@ -71,7 +71,7 @@ const UpdateUsername = ({setNewUser}:{setNewUser:Function}) => {
         <DialogHeader>
           <DialogTitle>Edit Username</DialogTitle>
           <DialogDescription>
-            Make changes to your username here. Click update when you're done.
+            Make changes to your username here. Click update when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <div className="flex gap-3 items-center justify-center">
@@ -108,7 +108,7 @@ const UpdateUsername = ({setNewUser}:{setNewUser:Function}) => {
                 {
                     !loading && usernameStatus == -1 && (
                         <div className="text-red-500 w-full mt-3">
-                            can't fetch usernames
+                            can&apos;t fetch usernames
                         </div>
                     )
                 }

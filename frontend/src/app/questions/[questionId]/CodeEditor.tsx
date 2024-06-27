@@ -37,7 +37,7 @@ const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{c
 
         setLoading(true);
 
-        const socket = new WebSocket("ws://localhost:8080");
+        const socket = new WebSocket("ws://backend-codeitup.azurewebsites.net");
         socket.onopen = () => {
         setSocket(socket);
         socket.send(JSON.stringify({userId: user.id , close: false}));

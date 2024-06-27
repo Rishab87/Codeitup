@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Submissions" ALTER COLUMN "executedTime" SET DATA TYPE DECIMAL(65,30),
+ALTER COLUMN "executedSpace" SET DATA TYPE DECIMAL(65,30);

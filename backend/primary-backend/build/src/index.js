@@ -48,7 +48,7 @@ app.options('*', (0, cors_1.default)({
     allowedHeaders: ['Origin', 'Content-Type', 'Authorization'], // Headers allowed in preflight
     credentials: true, // Allow credentials (cookies, tokens, etc.)
 }));
-const wss = new ws_1.default.Server({ port: 8080 });
+const wss = new ws_1.default.Server({ port: process.env.PORT || 6000});
 const tempDir = path_1.default.join(__dirname, '/temp');
 if (!fs_1.default.existsSync(tempDir)) {
     fs_1.default.mkdirSync(tempDir, { recursive: true });

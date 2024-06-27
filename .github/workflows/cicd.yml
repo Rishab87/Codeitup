@@ -16,7 +16,7 @@ jobs:
         with: 
           node-version: '18.x'
       - name: Navigate to Build Directory
-        run: cd ../../backend/primary-backend/build
+        run: cd backend/primary-backend/build
       - name: Install Dependencies
         run: npm install
       - name: Deploy to Azure App Service

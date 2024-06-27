@@ -15,6 +15,8 @@ jobs:
         uses: actions/setup-node@v4
         with: 
           node-version: '18.x'
+      - name: Navigate to Build Directory
+        run: cd ../../backend/primary-backend/build
       - name: Install Dependencies
         run: npm install
       - name: Deploy to Azure App Service
@@ -22,6 +24,6 @@ jobs:
         with:
           app-name: codeitup
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ../../backend/primary-backend/build   
+          package: .  
 
               

@@ -1,4 +1,4 @@
-const url = "backend-codeitup.azurewebsites.net"
+const url = "https://backend-codeitup.azurewebsites.net/api/v1"
 
 export const questionEndpoints = {
     getQuestionsByPage: `${url}/questions/questionsByPage`,

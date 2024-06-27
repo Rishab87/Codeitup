@@ -18,7 +18,7 @@ import path from 'path';
 const app = express();
 dotenv.config();
 
-const allowedOrigins = ['http://localhost:3000'];
+const allowedOrigins = ['http://localhost:3000' , 'https://codeitup.vercel.app'];
 
 app.use(
   cors({

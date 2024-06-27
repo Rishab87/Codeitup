@@ -57,10 +57,11 @@ export function InputOTPControlled() {
           <InputOTPSlot index={5} />
         </InputOTPGroup>
       </InputOTP>
-        <Button onClick={sendotpAPI} className="mt-4" variant={"link"}>resend it</Button>
-        <Button className="mt-4 ml-6" type="submit">Confirm</Button>
+
+        <Button className="mt-4 ml-32" type="submit">Confirm</Button>
 
     </form>
+    <Button onClick={sendotpAPI} className=" bottom-[40px] relative" variant={"link"}>resend it</Button>
       <div className="text-center text-sm">
         {value === "" ? (
           <>Enter your one-time password.</>

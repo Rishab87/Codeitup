@@ -19,6 +19,7 @@ jobs:
         run:  |
             cd ./backend/primary-backend/build
             npm install
+            npx prisma generate
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:

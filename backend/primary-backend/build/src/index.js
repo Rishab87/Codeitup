@@ -28,6 +28,7 @@ const client_1 = require("@prisma/client");
 const cloudinary_1 = require("../config/cloudinary");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const http = require('http');
 const app = (0, express_1.default)();
 dotenv_1.default.config();
 const allowedOrigins = ['http://localhost:3000', 'https://codeitup.vercel.app'];
@@ -48,7 +49,8 @@ app.options('*', (0, cors_1.default)({
     allowedHeaders: ['Origin', 'Content-Type', 'Authorization'], // Headers allowed in preflight
     credentials: true, // Allow credentials (cookies, tokens, etc.)
 }));
-const wss = new ws_1.default.Server({ port: process.env.PORT || 6000});
+const server = http.createServer(app);
+const wss = new ws_1.default.Server({ server});
 const tempDir = path_1.default.join(__dirname, '/temp');
 if (!fs_1.default.existsSync(tempDir)) {
     fs_1.default.mkdirSync(tempDir, { recursive: true });
@@ -161,7 +163,7 @@ redisClient_1.redisClient.subscribe('submissions', (message) => __awaiter(void 0
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, redisClient_1.connectRedis)();
     yield (0, redisClient_1.connectRedisQueue)();
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
     });
 });

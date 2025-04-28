@@ -13,7 +13,6 @@ export async function worker() {
     try {
         while (true) {
             const submission = await redisQueueClient.brPop("submissions", 0);
-            console.log(submission);
 
             const userSubmission = JSON.parse(submission!.element);
 
@@ -23,7 +22,6 @@ export async function worker() {
             let memory = 0;
             let lastExInput;
 
-            console.log("running test cases");
             try {
                 for (let testCase of userSubmission.testCases) {
                     const { input, output: expectedOutput } = testCase;
@@ -69,9 +67,7 @@ export async function worker() {
                 difficulty: userSubmission.difficulty,
                 userCode: userSubmission.userCode
             };
-            console.log(resultObj);
 
-            console.log("SENDING RESULT");
             // Send the result to the user
             await redisClient.publish("submissions", JSON.stringify(resultObj));
         }

@@ -20,6 +20,9 @@ COPY package*.json ./
 # Install Node.js dependencies
 RUN npm install
 
+#build
+RUN tsc -b
+
 # Copy the rest of your application code to the container
 COPY ./build /usr/src/app/
 

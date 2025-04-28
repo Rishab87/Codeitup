@@ -6,12 +6,8 @@ It is a platofrm like leetcode.
 > - The `primary-backend` is the main API.
 > - The `worker` is for processing submission code.
 
----
 
-
----
-
-## ⚙️ How to Setup Locally
+## How to Setup Locally
 
 ### 1. Frontend (Client-side)
 

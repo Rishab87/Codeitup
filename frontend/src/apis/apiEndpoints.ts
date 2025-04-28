@@ -1,4 +1,4 @@
-const url = "https://backend-codeitup.azurewebsites.net/api/v1"
+const url = process.env.NEXT_PUBLIC_BACKEND_URL
 
 export const questionEndpoints = {
     getQuestionsByPage: `${url}/questions/questionsByPage`,

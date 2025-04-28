@@ -27,6 +27,7 @@ const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{c
 
         if(!token){
             toast("Please login to submit code");
+            setLoading(false);
             return;
         }
 
@@ -37,7 +38,7 @@ const CodeEditor = ({config , questionId , setMessage , setLoading , loading}:{c
 
         setLoading(true);
 
-        const socket = new WebSocket("wss://backend-codeitup.azurewebsites.net");
+        const socket = new WebSocket(process.env.NEXT_PUBLIC_BACKEND_URL_WS!);
         socket.onopen = () => {
         setSocket(socket);
         socket.send(JSON.stringify({userId: user.id , close: false}));

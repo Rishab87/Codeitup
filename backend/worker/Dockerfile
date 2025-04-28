@@ -28,8 +28,8 @@ COPY ./build /usr/src/app/
 
 # Set environment variables if needed
 # ENV NODE_ENV=production
-ENV REDIS_HOST=rediss://red-cpen0en109ks73fgg0mg:pTsdgVDBfslqjYBT08pIZ1Wg3OBaK3yz@singapore-redis.render.com:6379
-ENV REDIS_QUEUE=rediss://red-cpi6afcf7o1s73bcr1og:SJ4WJDkJGABga82iElBAdCnLEy2BHcFG@singapore-redis.render.com:6379
+ENV REDIS_HOST=
+ENV REDIS_QUEUE=
 
 # Expose any ports your app needs
 # EXPOSE 8080
